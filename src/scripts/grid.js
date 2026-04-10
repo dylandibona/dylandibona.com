@@ -183,6 +183,8 @@ export function initGrid() {
       if (idx === 2) startMoodboardMosaic();
       if (wasIdx === 2 && idx !== 2) stopMoodboardMosaic();
 
+      if (idx === 5) fetchSpotifyTracks();
+
       if (idx === 6 && mondayPlayer) {
         mondayPlayer.setCurrentTime(0);
         mondayPlayer.play();
@@ -355,6 +357,48 @@ export function initGrid() {
       slides[current].classList.add('active');
       if (caption) caption.textContent = slides[current].dataset.title || '';
     }, 4000);
+  }
+
+  /* ── Spotify live tracks ── */
+  let spotifyFetched = false;
+
+  function fetchSpotifyTracks() {
+    if (spotifyFetched) return;
+    spotifyFetched = true;
+
+    const trackList = document.getElementById('trackList');
+    if (!trackList) return;
+
+    fetch('/api/spotify')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(({ tracks }) => {
+        if (!tracks?.length) return;
+        trackList.innerHTML = tracks.map((t, i) => `
+          <a class="ce-track" href="${t.spotifyUrl}" target="_blank"
+             data-album="${t.albumArt ?? ''}">
+            <span class="ce-track-num">${String(i + 1).padStart(2, '0')}</span>
+            <span class="ce-track-title">${t.title}</span>
+            <span class="ce-track-artist">${t.artist}</span>
+          </a>
+        `).join('');
+
+        // Re-attach track ghost listeners to new elements
+        const trackGhost = document.getElementById('trackGhost');
+        if (trackGhost) {
+          trackList.querySelectorAll('.ce-track').forEach(track => {
+            const albumUrl = track.dataset.album;
+            track.addEventListener('mouseenter', () => {
+              if (albumUrl) { trackGhost.style.backgroundImage = `url('${albumUrl}')`; trackGhost.classList.add('visible'); }
+            });
+            track.addEventListener('mouseleave', () => trackGhost.classList.remove('visible'));
+            track.addEventListener('mousemove', (e) => {
+              trackGhost.style.left = (e.clientX + 20) + 'px';
+              trackGhost.style.top  = (e.clientY - 80) + 'px';
+            });
+          });
+        }
+      })
+      .catch(() => {}); // silently keep static fallback on error
   }
 
   /* ── Boot ── */
