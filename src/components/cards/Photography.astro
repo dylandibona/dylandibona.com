@@ -1,0 +1,28 @@
+---
+const { prints, copy } = Astro.props;
+// Show first 5 for the gallery slideshow
+const galleryPrints = prints.slice(0, 5);
+---
+
+<div class="card" data-card-index="0">
+  <div class="card-bg" style={`background-image: url('/prints/${galleryPrints[0].file}'); filter: brightness(0.25);`}></div>
+  <div class="card-rest">
+    <div class="card-title">Photography</div>
+    <div class="card-sub">{prints.length} photographs</div>
+  </div>
+  <div class="card-expand">
+    <div class="ce-title">Photography</div>
+    <div class="photo-gallery" id="photoGallery">
+      {galleryPrints.map(print => (
+        <div
+          class="pg-slide"
+          style={`background-image: url('/prints/${print.file}')`}
+          data-title={print.title}
+        ></div>
+      ))}
+      <div class="pg-caption" id="pgCaption"></div>
+    </div>
+    <p class="photo-copy">{copy}</p>
+    <a class="ce-link-out" href="/prints">See all prints <span class="ea">&rarr;</span></a>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+---
+const { places } = Astro.props;
+---
+
+<div class="card" data-card-index="4">
+  <div class="card-rest">
+    <div class="card-title">Places to Stay</div>
+  </div>
+  <div class="card-expand">
+    <div class="ce-title">Places to Stay</div>
+    <p class="places-intro">Two homes. Hover to explore.</p>
+    <div class="places-duo">
+      {places.map(place => (
+        <div class="pd-img" style={`background-image: url('${place.image}')`}>
+          <div class="pd-label">
+            <div>
+              <div class="pd-label-city">{place.city}</div>
+              <div class="pd-label-detail">{place.detail}</div>
+            </div>
+            {place.bookUrl ? (
+              <a class="pd-label-link" href={place.bookUrl} target="_blank">{place.bookLabel} &nearr;</a>
+            ) : (
+              <span class="pd-label-link" style="opacity:0.4; pointer-events:none;">{place.bookLabel}</span>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>

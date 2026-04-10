@@ -12,6 +12,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@vimeo/player": "^2.30.3",
     "astro": "^6.1.3"
   }
 }

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "negroni",
+    "name": "Negroni",
+    "spirit": "Gin",
+    "desc": "The benchmark. Equal parts, no compromise.",
+    "photo": "/prints/negroni-time-signature-black-horizontal.jpg",
+    "ingredients": ["1 oz Gin", "1 oz Campari", "1 oz Sweet vermouth"],
+    "method": "Stir with ice until cold. Strain into a rocks glass over a large cube. Orange peel."
+  },
+  {
+    "id": "martini",
+    "name": "Martini",
+    "spirit": "Gin / Vodka",
+    "desc": "Cold, clear, and completely unambiguous.",
+    "photo": "/prints/quiet-line-signature-oak-vertical.jpg",
+    "ingredients": ["2½ oz Gin (or vodka)", "½ oz Dry vermouth"],
+    "method": "Stir with ice until very cold. Strain into a chilled coupe. Lemon twist or olive."
+  },
+  {
+    "id": "manhattan",
+    "name": "Manhattan",
+    "spirit": "Rye",
+    "desc": "The one that stays with you.",
+    "photo": "/prints/house-red-signature-black-vertical.jpg",
+    "ingredients": ["2 oz Rye whiskey", "1 oz Sweet vermouth", "2 dashes Angostura bitters"],
+    "method": "Stir with ice. Strain into a coupe. Brandied cherry."
+  },
+  {
+    "id": "oldfashioned",
+    "name": "Old Fashioned",
+    "spirit": "Bourbon",
+    "desc": "Patience required. Worth it.",
+    "photo": "/prints/ferme-signature-black-vertical.jpg",
+    "ingredients": ["2 oz Bourbon", "1 sugar cube", "2 dashes Angostura bitters", "Splash of water"],
+    "method": "Muddle sugar, bitters, and water. Add bourbon and ice, stir. Orange peel."
+  },
+  {
+    "id": "daiquiri",
+    "name": "Daiquiri",
+    "spirit": "Rum",
+    "desc": "Three ingredients. Perfect when they're right.",
+    "photo": "/prints/plage-du-prado-signature-black-horizontal.jpg",
+    "ingredients": ["2 oz White rum", "1 oz Fresh lime juice", "¾ oz Simple syrup"],
+    "method": "Shake with ice. Double-strain into a chilled coupe. No garnish."
+  },
+  {
+    "id": "margarita",
+    "name": "Margarita",
+    "spirit": "Tequila",
+    "desc": "The only one worth ordering anywhere.",
+    "photo": "/prints/escorca-signature-black-horizontal.jpg",
+    "ingredients": ["2 oz Tequila blanco", "1 oz Fresh lime juice", "½ oz Cointreau", "¼ oz Agave syrup"],
+    "method": "Shake with ice. Strain into a rocks glass over ice. Half-salted rim optional."
+  },
+  {
+    "id": "sazerac",
+    "name": "Sazerac",
+    "spirit": "Rye",
+    "desc": "New Orleans in a glass. The rinse matters.",
+    "photo": "/prints/red-flag-signature-black-vertical.jpg",
+    "ingredients": ["2 oz Rye whiskey", "1 sugar cube", "3 dashes Peychaud's bitters", "Absinthe rinse"],
+    "method": "Rinse a chilled rocks glass with absinthe, discard. Muddle sugar and bitters, add rye and ice, stir. Strain in. Express lemon peel over top."
+  },
+  {
+    "id": "gimlet",
+    "name": "Gimlet",
+    "spirit": "Gin",
+    "desc": "Simple, bright, and better than you remember.",
+    "photo": "/prints/morning-inversion-signature-black-horizontal.jpg",
+    "ingredients": ["2 oz Gin", "¾ oz Fresh lime juice", "¾ oz Simple syrup"],
+    "method": "Shake with ice. Strain into a chilled coupe. Lime wheel."
+  }
+]

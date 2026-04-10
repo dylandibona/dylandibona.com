@@ -1,0 +1,44 @@
+---
+const { tracks, playlists, copy } = Astro.props;
+---
+
+<div class="card" data-card-index="5">
+  <div class="card-rest">
+    <div class="card-title">Listening</div>
+  </div>
+  <div class="card-expand">
+    <div class="ce-title">Listening</div>
+    <p class="ce-listening-copy">{copy}</p>
+    <div class="listen-toggle" id="listenToggle">
+      <div class="listen-toggle-pill"></div>
+      <button class="listen-toggle-btn active" data-tab="recent">Recent</button>
+      <button class="listen-toggle-btn" data-tab="playlists">Playlists</button>
+    </div>
+    <div class="kiosk-panel active" data-tab="recent" data-card="listening">
+      <div class="ce-tracks" id="trackList">
+        {tracks.map(track => (
+          <a
+            class="ce-track"
+            href={track.spotifyUrl}
+            target="_blank"
+            data-album={track.album}
+          >
+            <span class="ce-track-num">{track.num}</span>
+            <span class="ce-track-title">{track.title}</span>
+            <span class="ce-track-artist">{track.artist}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+    <div class="kiosk-panel" data-tab="playlists" data-card="listening">
+      <div class="ce-playlists">
+        {playlists.map(pl => (
+          <a class="ce-playlist" href={pl.url} target="_blank">
+            <div class="ce-playlist-name">{pl.name}</div>
+            <div class="ce-playlist-meta">Spotify</div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>

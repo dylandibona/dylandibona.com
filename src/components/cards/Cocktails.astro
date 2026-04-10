@@ -1,0 +1,25 @@
+---
+const { recipes } = Astro.props;
+---
+
+<div class="card" data-card-index="3">
+  <div class="card-rest">
+    <div class="card-title">Cocktails</div>
+  </div>
+  <div class="card-expand">
+    <div class="ce-title">Cocktails</div>
+    <div class="ce-list" id="cocktailList">
+      {recipes.map(recipe => (
+        <div
+          class="ce-list-item"
+          data-cocktail={recipe.id}
+          data-photo={recipe.photo}
+          onclick={`showRecipe('${recipe.id}')`}
+        >
+          <span>{recipe.name}</span>
+          <span>{recipe.spirit}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>

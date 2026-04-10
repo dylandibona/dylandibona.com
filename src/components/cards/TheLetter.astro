@@ -1,0 +1,24 @@
+---
+const { letter } = Astro.props;
+---
+
+<div class="card" data-card-index="1">
+  <div class="card-rest">
+    <div class="card-title">The Letter</div>
+    <div class="card-sub">Monthly</div>
+  </div>
+  <div class="card-expand">
+    <div class="ce-title">The Letter</div>
+    <div class="ce-desc">{letter.tagline}</div>
+    <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end;">
+      <div style="font-size:9px; color:var(--red-dim); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px;">From the last issue</div>
+      <div style="font-family:'ABC Bingo',serif; font-size:18px; color:var(--red); line-height:1.35; margin-bottom:12px;" set:html={letter.lastIssueTitle}></div>
+      <div style="font-size:12px; line-height:1.7; color:var(--red); opacity:0.65;">{letter.lastIssueExcerpt}</div>
+      <a class="ce-link-in" href="/newsletter" style="margin-top:auto; margin-bottom:12px;">Read the full letter <span class="ea">&rarr;</span></a>
+    </div>
+    <form class="card-nl" onsubmit="event.preventDefault()">
+      <input type="email" placeholder="your email" />
+      <button type="submit">Subscribe</button>
+    </form>
+  </div>
+</div>

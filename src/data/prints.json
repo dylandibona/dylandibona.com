@@ -1,0 +1,22 @@
+[
+  { "slug": "negroni-time", "file": "negroni-time-signature-black-horizontal.jpg", "title": "Negroni Time", "orientation": "horizontal" },
+  { "slug": "ferme", "file": "ferme-signature-black-vertical.jpg", "title": "Ferme", "orientation": "vertical" },
+  { "slug": "plage-du-prado", "file": "plage-du-prado-signature-black-horizontal.jpg", "title": "Plage du Prado", "orientation": "horizontal" },
+  { "slug": "house-red", "file": "house-red-signature-black-vertical.jpg", "title": "House Red", "orientation": "vertical" },
+  { "slug": "escorca", "file": "escorca-signature-black-horizontal.jpg", "title": "Escorca", "orientation": "horizontal" },
+  { "slug": "quiet-line", "file": "quiet-line-signature-oak-vertical.jpg", "title": "Quiet Line", "orientation": "vertical" },
+  { "slug": "red-flag", "file": "red-flag-signature-black-vertical.jpg", "title": "Red Flag", "orientation": "vertical" },
+  { "slug": "morning-inversion", "file": "morning-inversion-signature-black-horizontal.jpg", "title": "Morning Inversion", "orientation": "horizontal" },
+  { "slug": "autumn-lines", "file": "autumn-lines-signature-black-horizontal.jpg", "title": "Autumn Lines", "orientation": "horizontal" },
+  { "slug": "cat-scratch-fever", "file": "cat-scratch-fever-signature-black-vertical.jpg", "title": "Cat Scratch Fever", "orientation": "vertical" },
+  { "slug": "channel-cruise", "file": "channel-cruise-signature-black-horizontal.jpg", "title": "Channel Cruise", "orientation": "horizontal" },
+  { "slug": "fern-fender", "file": "fern-fender-signature-black-horizontal.jpg", "title": "Fern Fender", "orientation": "horizontal" },
+  { "slug": "free-plays", "file": "free-plays-signature-black-vertical.jpg", "title": "Free Plays", "orientation": "vertical" },
+  { "slug": "indication", "file": "indication-signature-black-vertical.jpg", "title": "Indication", "orientation": "vertical" },
+  { "slug": "neighborhood-kook", "file": "neighborhood-kook-signature-white-vertical.jpg", "title": "Neighborhood Kook", "orientation": "vertical" },
+  { "slug": "over-nice", "file": "over-nice-signature-white-vertical.jpg", "title": "Over Nice", "orientation": "vertical" },
+  { "slug": "saint-vincent", "file": "saint-vincent-signature-oak-horizontal.jpg", "title": "Saint Vincent", "orientation": "horizontal" },
+  { "slug": "talaia-view", "file": "talaia-view-signature-black-horizontal.jpg", "title": "Talaia View", "orientation": "horizontal" },
+  { "slug": "tuba-club", "file": "tuba-club-signature-black-horizontal.jpg", "title": "Tuba Club", "orientation": "horizontal" },
+  { "slug": "vesterbro", "file": "vesterbro-signature-black-vertical.jpg", "title": "Vesterbro", "orientation": "vertical" }
+]

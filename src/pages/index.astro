@@ -1,11 +1,46 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import IdentityBar from '../components/IdentityBar.astro';
+import RecipeModal from '../components/RecipeModal.astro';
+import Photography from '../components/cards/Photography.astro';
+import TheLetter from '../components/cards/TheLetter.astro';
+import Moodboard from '../components/cards/Moodboard.astro';
+import Cocktails from '../components/cards/Cocktails.astro';
+import PlacesToStay from '../components/cards/PlacesToStay.astro';
+import Listening from '../components/cards/Listening.astro';
+import MondayPartners from '../components/cards/MondayPartners.astro';
+import Natrx from '../components/cards/Natrx.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import prints from '../data/prints.json';
+import recipes from '../data/recipes.json';
+import tracks from '../data/tracks.json';
+import playlists from '../data/playlists.json';
+import site from '../data/site.json';
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Dylan DiBona">
+  <div id="cursor"></div>
+  <div id="trackGhost"></div>
+
+  <div class="card-area" id="cardArea">
+    <Photography prints={prints} copy={site.photography.copy} />
+    <TheLetter letter={site.letter} />
+    <Moodboard />
+    <Cocktails recipes={recipes} />
+    <PlacesToStay places={site.places} />
+    <Listening tracks={tracks} playlists={playlists} copy={site.listening.copy} />
+    <MondayPartners monday={site.monday} />
+    <Natrx natrx={site.natrx} />
+  </div>
+
+  <IdentityBar site={site} />
+  <RecipeModal recipes={recipes} />
 </Layout>
+
+<script>
+  import { initMoodboard } from '../scripts/moodboard.js';
+  import { initGrid } from '../scripts/grid.js';
+
+  initMoodboard();
+  initGrid();
+</script>

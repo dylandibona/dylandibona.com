@@ -1,0 +1,45 @@
+{
+  "name": "Dylan DiBona",
+  "email": "dylan@dylandibona.com",
+  "phones": [
+    { "label": "US", "number": "415 341 2855", "href": "tel:+14153412855" },
+    { "label": "UK", "number": "+44 7884 087851", "href": "tel:+447884087851" },
+    { "label": "FR", "number": "+33 7 49 08 13 80", "href": "tel:+33749081380" }
+  ],
+  "photography": {
+    "copy": "Fine art prints, made to order. Archival pigment on Hahnemühle Photo Rag. Each print signed and framed."
+  },
+  "letter": {
+    "tagline": "One topic per month. Photography, music, recipes, the texture of paying attention.",
+    "lastIssueTitle": "Using AI to learn e\u2011commerce\u202f/\u202fe\u2011commerce to learn AI",
+    "lastIssueExcerpt": "The mutual illumination of two tools used to understand each other. The power of knowing when to stop."
+  },
+  "listening": {
+    "copy": "What's been on rotation lately."
+  },
+  "monday": {
+    "desc": "Creative direction and brand strategy. Award-winning, new-breed creative studio.",
+    "url": "https://mondayandpartners.com",
+    "vimeoId": "873745682"
+  },
+  "natrx": {
+    "desc": "Head of Marketing. Coastal restoration, living shorelines, engineered reefs.",
+    "url": "https://natrx.io"
+  },
+  "places": [
+    {
+      "city": "San Francisco",
+      "detail": "Studio Zero · The Mission · Sleeps 4",
+      "image": "/places-to-stay/san-francisco.png",
+      "bookUrl": "https://studiozerosf.com",
+      "bookLabel": "Book"
+    },
+    {
+      "city": "Nice",
+      "detail": "Vieux Nice · Rue Arson",
+      "image": "/places-to-stay/nice.jpg",
+      "bookUrl": "https://ruearson.carrd.co/",
+      "bookLabel": "Book"
+    }
+  ]
+}

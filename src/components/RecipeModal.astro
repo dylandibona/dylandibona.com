@@ -1,0 +1,57 @@
+---
+import type { Recipe } from '../types';
+const { recipes } = Astro.props;
+---
+
+<div id="cocktailGhost"></div>
+
+<div class="modal-overlay" id="recipeModal">
+  <div class="modal-content">
+    <div class="modal-photo" id="modalPhoto"></div>
+    <div class="modal-body">
+      <div class="modal-header">
+        <div class="modal-recipe-name" id="recipeName"></div>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <p class="modal-desc" id="recipeDesc"></p>
+      <div class="modal-section-label">Ingredients</div>
+      <div class="modal-ingredients" id="recipeIngredients"></div>
+      <div class="modal-section-label">Method</div>
+      <div class="modal-method" id="recipeMethod"></div>
+      <a class="modal-text-btn" id="recipeSend" href="#">Text it to myself &rarr;</a>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ recipes }}>
+  const modal = document.getElementById('recipeModal');
+  const recipeMap = Object.fromEntries(recipes.map(r => [r.id, r]));
+
+  window.showRecipe = function(id) {
+    const r = recipeMap[id];
+    if (!r) return;
+
+    document.getElementById('recipeName').textContent = r.name;
+    document.getElementById('recipeDesc').textContent = r.desc;
+    document.getElementById('recipeIngredients').innerHTML = r.ingredients.join('<br>');
+    document.getElementById('recipeMethod').textContent = r.method;
+
+    const photo = document.getElementById('modalPhoto');
+    if (r.photo) photo.style.backgroundImage = `url('${r.photo}')`;
+
+    const body = `${r.name}\n\n${r.ingredients.join('\n')}\n\n${r.method}`;
+    document.getElementById('recipeSend').href = `sms:?body=${encodeURIComponent(body)}`;
+
+    modal.style.display = 'block';
+    requestAnimationFrame(() => modal.classList.add('visible'));
+  };
+
+  function closeRecipe() {
+    modal.classList.remove('visible');
+    setTimeout(() => { modal.style.display = 'none'; }, 300);
+  }
+
+  document.getElementById('modalClose').addEventListener('click', closeRecipe);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeRecipe(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeRecipe(); });
+</script>

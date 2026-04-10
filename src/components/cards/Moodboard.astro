@@ -1,0 +1,58 @@
+---
+const TUMBLR_API_KEY = 'LAXdzOBCvTxXuGI22iMZzNgwOLHnLiWZQNYhZERgfjO0mRCYcU';
+const TUMBLR_BLOG    = 'moodboard.dylandibona.com';
+
+const fallback = [
+  '/prints/negroni-time-signature-black-horizontal.jpg',
+  '/prints/quiet-line-signature-oak-vertical.jpg',
+  '/prints/house-red-signature-black-vertical.jpg',
+  '/prints/ferme-signature-black-vertical.jpg',
+  '/prints/plage-du-prado-signature-black-horizontal.jpg',
+  '/prints/escorca-signature-black-horizontal.jpg',
+  '/prints/red-flag-signature-black-vertical.jpg',
+  '/prints/morning-inversion-signature-black-horizontal.jpg',
+];
+
+let moodImages = fallback;
+
+try {
+  const imgRegex = /src="(https:\/\/[^"]+\.(?:jpg|jpeg|png|gif|webp)[^"]*)"/gi;
+  const urls: string[] = [];
+
+  // Fetch 5 pages of 20 = up to 100 posts in parallel
+  const pages = await Promise.all(
+    [0, 20, 40, 60, 80].map(offset =>
+      fetch(`https://api.tumblr.com/v2/blog/${TUMBLR_BLOG}/posts?api_key=${TUMBLR_API_KEY}&limit=20&offset=${offset}`)
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null)
+    )
+  );
+
+  for (const data of pages) {
+    for (const post of (data?.response?.posts || [])) {
+      const body: string = post.body || '';
+      imgRegex.lastIndex = 0;
+      let match;
+      while ((match = imgRegex.exec(body)) !== null) {
+        urls.push(match[1]);
+      }
+    }
+  }
+
+  if (urls.length > 0) moodImages = urls;
+} catch (e) {}
+---
+
+<div class="card moodboard-card" data-card-index="2" data-href="https://moodboard.dylandibona.com">
+  <div class="card-rest" style="z-index:3;">
+    <div class="card-title">Moodboard</div>
+  </div>
+  <div class="card-expand mood-expand" style="z-index:3;">
+    <div class="mood-gallery" id="moodboardMosaic" data-images={JSON.stringify(moodImages)}></div>
+    <div class="mood-text">
+      <div class="ce-title">Moodboard</div>
+      <div class="ce-desc">An endless scroll of things I'm looking at.</div>
+      <a class="ce-link-out" href="https://moodboard.dylandibona.com" target="_blank">Visit the Moodboard <span class="ea">&nearr;</span></a>
+    </div>
+  </div>
+</div>

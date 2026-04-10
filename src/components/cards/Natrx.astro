@@ -1,0 +1,16 @@
+---
+const { natrx } = Astro.props;
+---
+
+<div class="card" data-card-index="7" data-href={natrx.url}>
+  <div class="card-bg" style="background: linear-gradient(145deg, #142018, #111110);"></div>
+  <div class="card-rest">
+    <div class="card-title">Natrx</div>
+  </div>
+  <div class="card-expand">
+    <div class="ce-title">Natrx</div>
+    <div class="ce-desc">{natrx.desc}</div>
+    <div style="flex:1;"></div>
+    <a class="ce-link-out" href={natrx.url} target="_blank">natrx.io <span class="ea">&nearr;</span></a>
+  </div>
+</div>

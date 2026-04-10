@@ -1,0 +1,23 @@
+---
+const { monday } = Astro.props;
+---
+
+<div class="card" data-card-index="6" data-href={monday.url}>
+  <div class="card-rest">
+    <div class="card-title">Monday + Partners</div>
+  </div>
+  <div class="card-expand">
+    <div class="ce-title">Monday + Partners</div>
+    <div class="ce-desc">{monday.desc}</div>
+    <div class="monday-video-wrap">
+      <iframe
+        id="mondayVideo"
+        src={`https://player.vimeo.com/video/${monday.vimeoId}?autoplay=0&muted=1&loop=1&background=1&title=0&byline=0&portrait=0`}
+        class="monday-video"
+        allow="autoplay; fullscreen; picture-in-picture"
+        allowfullscreen
+      ></iframe>
+    </div>
+    <a class="ce-link-out" href={monday.url} target="_blank">mondayandpartners.com <span class="ea">&nearr;</span></a>
+  </div>
+</div>

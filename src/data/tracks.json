@@ -1,0 +1,12 @@
+[
+  { "num": "01", "title": "Says", "artist": "Nils Frahm", "album": "/prints/negroni-time-signature-black-horizontal.jpg", "spotifyUrl": "https://open.spotify.com/search/Says%20Nils%20Frahm" },
+  { "num": "02", "title": "A Little Lost", "artist": "Arthur Russell", "album": "/prints/quiet-line-signature-oak-vertical.jpg", "spotifyUrl": "https://open.spotify.com/search/A%20Little%20Lost%20Arthur%20Russell" },
+  { "num": "03", "title": "LesAlpx", "artist": "Floating Points", "album": "/prints/house-red-signature-black-vertical.jpg", "spotifyUrl": "https://open.spotify.com/search/LesAlpx%20Floating%20Points" },
+  { "num": "04", "title": "Piel", "artist": "Arca", "album": "/prints/ferme-signature-black-vertical.jpg", "spotifyUrl": "https://open.spotify.com/search/Piel%20Arca" },
+  { "num": "05", "title": "Taphead", "artist": "Talk Talk", "album": "/prints/plage-du-prado-signature-black-horizontal.jpg", "spotifyUrl": "https://open.spotify.com/search/Taphead%20Talk%20Talk" },
+  { "num": "06", "title": "An Ending (Ascent)", "artist": "Brian Eno", "album": "/prints/escorca-signature-black-horizontal.jpg", "spotifyUrl": "https://open.spotify.com/search/An%20Ending%20Ascent%20Brian%20Eno" },
+  { "num": "07", "title": "Archangel", "artist": "Burial", "album": "/prints/red-flag-signature-black-vertical.jpg", "spotifyUrl": "https://open.spotify.com/search/Archangel%20Burial" },
+  { "num": "08", "title": "Difference", "artist": "Grouper", "album": "/prints/morning-inversion-signature-black-horizontal.jpg", "spotifyUrl": "https://open.spotify.com/search/Difference%20Grouper" },
+  { "num": "09", "title": "Limit to Your Love", "artist": "James Blake", "album": "/prints/negroni-time-signature-black-horizontal.jpg", "spotifyUrl": "https://open.spotify.com/search/Limit%20to%20Your%20Love%20James%20Blake" },
+  { "num": "10", "title": "dlp 1.1", "artist": "William Basinski", "album": "/prints/quiet-line-signature-oak-vertical.jpg", "spotifyUrl": "https://open.spotify.com/search/dlp%201.1%20William%20Basinski" }
+]
