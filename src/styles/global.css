@@ -380,7 +380,7 @@ html, body {
 .ce-tracks .ce-track:hover .ce-track-title { color: var(--white); }
 .ce-track-artist { font-size: 10px; color: var(--red-dim); transition: color 0.3s; white-space: nowrap; }
 .ce-tracks .ce-track:hover .ce-track-artist { color: var(--red); }
-.ce-tracks a.ce-track:hover .ce-track-artist::after { content: ' · Spotify ↗'; font-size: 9px; color: var(--red-dim); }
+.ce-tracks a.ce-track:hover .ce-track-artist::after { content: ' ↗'; font-size: 9px; color: var(--red-dim); }
 
 .ce-playlists { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
 .ce-playlist {
