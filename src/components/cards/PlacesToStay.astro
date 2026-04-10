@@ -4,18 +4,21 @@ const { places } = Astro.props;
 
 <div class="card" data-card-index="4">
   <div class="card-rest">
-    <div class="card-title">Places to Stay</div>
+    <div class="card-title">A Place For You In...</div>
   </div>
-  <div class="card-expand">
-    <div class="ce-title">Places to Stay</div>
-    <p class="places-intro">Two homes. Hover to explore.</p>
+  <div class="card-expand places-expand">
+    <div class="places-title">A Place For You In...</div>
     <div class="places-duo">
-      {places.map(place => (
+      {places.map((place: any) => (
         <div class="pd-img" style={`background-image: url('${place.image}')`}>
           <div class="pd-label">
             <div>
               <div class="pd-label-city">{place.city}</div>
-              <div class="pd-label-detail">{place.detail}</div>
+              <ul class="pd-label-bullets">
+                <li>{place.name}</li>
+                <li>{place.neighborhood}</li>
+                <li>Sleeps {place.sleeps}</li>
+              </ul>
             </div>
             {place.bookUrl ? (
               <a class="pd-label-link" href={place.bookUrl} target="_blank">{place.bookLabel} &nearr;</a>

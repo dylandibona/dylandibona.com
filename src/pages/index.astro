@@ -12,10 +12,29 @@ import MondayPartners from '../components/cards/MondayPartners.astro';
 import Natrx from '../components/cards/Natrx.astro';
 
 import prints from '../data/prints.json';
-import recipes from '../data/recipes.json';
 import tracks from '../data/tracks.json';
 import playlists from '../data/playlists.json';
 import site from '../data/site.json';
+
+const cocktailMods = import.meta.glob('../content/cocktails/*.json', { eager: true });
+const recipes = Object.entries(cocktailMods).map(([path, mod]: any) => {
+  const slug = path.replace('../content/cocktails/', '').replace('.json', '');
+  return {
+    id: slug,
+    name: mod.name as string,
+    order: mod.order != null ? (mod.order as number) : null,
+    spirit: mod.spirit as string,
+    desc: mod.desc as string,
+    photo: mod.photo ? (mod.photo.startsWith('/') ? mod.photo : `/cocktails/${mod.photo}`) : null,
+    ingredients: (mod.ingredients ?? []) as string[],
+    method: mod.method as string,
+  };
+}).sort((a, b) => {
+  if (a.order != null && b.order != null) return a.order - b.order;
+  if (a.order != null) return -1;
+  if (b.order != null) return 1;
+  return a.name.localeCompare(b.name);
+});
 ---
 
 <Layout title="Dylan DiBona">

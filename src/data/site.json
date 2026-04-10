@@ -29,14 +29,18 @@
   "places": [
     {
       "city": "San Francisco",
-      "detail": "Studio Zero · The Mission · Sleeps 4",
-      "image": "/places-to-stay/san-francisco.png",
+      "name": "Studio Zero",
+      "neighborhood": "Mission District",
+      "sleeps": 2,
+      "image": "/places-to-stay/san-francisco.jpg",
       "bookUrl": "https://studiozerosf.com",
       "bookLabel": "Book"
     },
     {
       "city": "Nice",
-      "detail": "Vieux Nice · Rue Arson",
+      "name": "Rue Arson",
+      "neighborhood": "Riquier",
+      "sleeps": 4,
       "image": "/places-to-stay/nice.jpg",
       "bookUrl": "https://ruearson.carrd.co/",
       "bookLabel": "Book"

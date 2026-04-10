@@ -2,10 +2,32 @@
 const { prints, copy } = Astro.props;
 // Show first 5 for the gallery slideshow
 const galleryPrints = prints.slice(0, 5);
+
+const lifestyleImages = [
+  'autumnlines.features.1080x1350.1.jpg',
+  'bagatelle.features.1080x1350.1.jpg',
+  'capestel.features.1080x1350.1.jpg',
+  'clouda.features.1080x1350.1.jpg',
+  'editionsconfluences.features.1080x1350.1.jpg',
+  'escorca.features.1080x1350.1.jpg',
+  'freeplays.features.1080x1350.1.jpg',
+  'housered.features.1080x1350.1.jpg',
+  'kook.features.1080x1350.1.jpg',
+  'morninginversion.features.1080x1350.1.jpg',
+  'negronitime.features.1080x1350.1.jpg',
+  'overnice.features.1080x1350.1.jpg',
+  'plagedupradofeatures.1080x1350.1.jpg',
+  'quiteline.features.1080x1350.1.jpg',
+  'redflag.features.1080x1350.1.jpg',
+  'stvincent.1080x1350.1.jpg',
+  'talaia.features.1080x1350.1.jpg',
+  'vesterbro.features.1080x1350.1.jpg',
+].map(f => `/prints-lifestyle/${f}`);
+const bgImage = lifestyleImages[Math.floor(Math.random() * lifestyleImages.length)];
 ---
 
-<div class="card" data-card-index="0">
-  <div class="card-bg" style={`background-image: url('/prints/${galleryPrints[0].file}'); filter: brightness(0.25);`}></div>
+<div class="card photo-card" data-card-index="0" style={`background-image: url('${bgImage}'); background-size: cover; background-position: center;`}>
+  <div class="photo-card-overlay"></div>
   <div class="card-rest">
     <div class="card-title">Photography</div>
     <div class="card-sub">{prints.length} photographs</div>

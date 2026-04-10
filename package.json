@@ -12,8 +12,13 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/react": "^5.0.3",
     "@astrojs/vercel": "^10.0.4",
+    "@keystatic/astro": "^5.0.6",
+    "@keystatic/core": "^0.5.50",
     "@vimeo/player": "^2.30.3",
-    "astro": "^6.1.3"
+    "astro": "^6.1.3",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
   }
 }

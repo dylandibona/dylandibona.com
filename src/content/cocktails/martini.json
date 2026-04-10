@@ -1,0 +1,13 @@
+{
+  "name": "Martini",
+  "order": 2,
+  "spirit": "Gin",
+  "desc": "I never understand why people think a \"dry\" martini where they don't add any vermouth is good. It's just a glass of gin. A good martini is interesting. And probably too easy to drink. Here's one you can't go wrong with. Don't use Tanqueray. It's gross.",
+  "photo": "/cocktails/martini/photo.jpg",
+  "ingredients": [
+    "3 shakes orange bitters",
+    "2¼ oz London Dry Gin",
+    "1 oz Dolin Dry Vermouth"
+  ],
+  "method": "Stir or shake lightly, like more of an energetic swirl. Or mix them up and put them in freezer ahead of time don't worry about the ice. If you're like olives put ONE DROP of olive brine in. Any more is truly gross."
+}

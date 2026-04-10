@@ -1,0 +1,12 @@
+{
+  "name": "Daiquiri",
+  "order": 3,
+  "spirit": "Rum",
+  "desc": "Three ingredients. Perfect when they're right.",
+  "ingredients": [
+    "2 oz White rum",
+    "1 oz Fresh lime juice",
+    "¾ oz Simple syrup"
+  ],
+  "method": "Shake with ice. Double-strain into a chilled coupe. No garnish."
+}

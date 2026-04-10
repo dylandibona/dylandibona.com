@@ -1,0 +1,13 @@
+{
+  "name": "Negroni",
+  "order": 1,
+  "spirit": "Gin",
+  "desc": "Just the go-to. Always right. And don't mess with the ingredients this is literally the best way to do it. Use Dolin Sweet vermouth. Everything else is syrupy and sweet. Only use London dry gin. Everything else tastes like herbs and this is not the time for that. Use Campari. Only.",
+  "photo": "/cocktails/negroni/photo.jpg",
+  "ingredients": [
+    "1.5 oz London Dry Gin",
+    "1.5 oz Campari",
+    "1.5 oz Dolin Sweet vermouth"
+  ],
+  "method": "Stir with ice for at least 20 seconds. Get it cold. Put an orange peel in there you fancy motherfucker."
+}
