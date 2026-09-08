@@ -92,7 +92,7 @@ ${o.amountText}
 Shipping to
 ${addressLines(o).join('\n')}
 
-Each print is made when it is ordered, by hand in London on Hahnemühle Photo Rag. Allow two to three weeks. I will write again when it ships.
+Each print is made when it is ordered, by hand in London on Hahnemühle Photo Rag. Allow up to 10 days depending on your address. You'll get a note when it ships.
 
 Your order: ${o.receiptUrl}
 
@@ -106,11 +106,11 @@ Dylan`;
   ${printBlock(o)}
   <tr><td>${label('Shipping to')}${lines(addressLines(o))}</td></tr>
   <tr><td>
-    ${p('Each print is made when it is ordered, by hand in London on Hahnemühle Photo Rag. Allow two to three weeks. I will write again when it ships.')}
+    ${p('Each print is made when it is ordered, by hand in London on Hahnemühle Photo Rag. Allow up to 10 days depending on your address. You'll get a note when it ships.')}
     ${p(`Your order is at <a href="${o.receiptUrl}" style="color:#F2F0EC;text-decoration:underline;text-decoration-color:rgba(242,240,236,.35)">dylandibona.com/orders/${esc(o.ref)}</a>.`)}
     ${p('If anything about this is wrong, or you just want to say hello, reply to this email. It comes to me.')}
     ${p('Dylan', 'margin-top:1.6em;color:rgba(242,240,236,.6)')}
-  </td></tr>`, `${o.title}, ${o.sizeIn} in, ${frameText(o).toLowerCase()}. Two to three weeks.`);
+  </td></tr>`, `${o.title}, ${o.sizeIn} in, ${frameText(o).toLowerCase()}. Up to 10 days.`);
   await send(o.email, `Your print: ${o.title}`, text, html);
 }
 
