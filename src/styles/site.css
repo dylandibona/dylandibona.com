@@ -280,6 +280,11 @@ p{max-width:54ch;line-height:1.64;color:rgba(242,240,236,.82);font-size:15px;fon
   display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:1.2em;
   padding:.66em .1em;text-align:left;opacity:.5;transition:opacity .3s ease}
 .sizes button:hover{opacity:.8}
+.sizes button:focus{outline:none}
+.sizes button:focus-visible{outline:1px solid rgba(242,240,236,.5);outline-offset:-1px}
+.frames button:focus{outline:none}
+.frames button:focus-visible .sw{box-shadow:0 0 0 2px rgba(242,240,236,.6)}
+.units button:focus{outline:none}
 .sizes li[aria-selected="true"] button{opacity:1}
 .sizes .amt{font-variant-numeric:tabular-nums;white-space:nowrap}
 .sizes .u{color:var(--faint)}
