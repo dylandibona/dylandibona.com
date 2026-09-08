@@ -30,33 +30,48 @@ const email = s.customer_details?.email ?? '';
 const amount = money(s.amount_total ?? 0);
 ---
 <Site title="Order received — Dylan James DiBona" description="Order received."
-      crumbs={[{ label: 'Prints', href: '/prints' }, { label: 'Order' }]} open read>
-  <div class="receipt">
-    <div class="eyebrow">Received</div>
-    {print && (
-      <div class="mount mount-sm" data-frame={frame?.code ?? 'black'}>
-        <span class="rail rail-t"></span><span class="rail rail-r"></span>
-        <span class="rail rail-b"></span><span class="rail rail-l"></span>
-        <Image src={print.image} alt={print.title} widths={[280, 560]} sizes="200px" quality={78} />
+      crumbs={[{ label: 'Prints', href: '/prints' }, { label: 'Order' }]} open>
+  {/* Same shape as the print page: the framed print left, the facts right. */}
+  <div class="detail receipt">
+    <div class="shot">
+      {print && (
+        <div class="mount" data-frame={frame?.code ?? 'black'}>
+          <span class="rail rail-t"></span><span class="rail rail-r"></span>
+          <span class="rail rail-b"></span><span class="rail rail-l"></span>
+          <Image src={print.image} alt={print.title} widths={[900, 1400]}
+                 sizes="(max-width:920px) 88vw, 55vw" quality={82} />
+        </div>
+      )}
+    </div>
+
+    <div class="buy">
+      <div class="eyebrow">Your order</div>
+      <h2>{print?.title ?? 'Your print'}</h2>
+      {print?.where && <div class="label" style="margin:-.4em 0 1.4em">{print.where}</div>}
+
+      <div class="rx">
+        {size && <span>{size.cm} cm · {size.inches} in</span>}
+        {frame && <span>{frame.code === 'none' ? 'Unframed, ships rolled' : `Framed in ${frame.label.toLowerCase()}`}</span>}
+        <span>{amount}</span>
       </div>
-    )}
-    <h2>{print?.title ?? 'Your print'}</h2>
-    <p class="lede">
-      {size && <>{size.cm} cm · {size.inches} in<br /></>}
-      {frame && (frame.code === 'none' ? 'Unframed, ships rolled' : `Framed in ${frame.label.toLowerCase()}`)}
-      <br />{amount}
-    </p>
-    {addr && (
-      <p class="fine">
-        {name}<br />
-        {addr.line1}{addr.line2 && <><br />{addr.line2}</>}<br />
-        {addr.city}{addr.state ? `, ${addr.state}` : ''} {addr.postal_code}<br />
-        {addr.country}
-      </p>
-    )}
-    <p class="fine">
-      Printed to order in London. Allow two to three weeks. A note goes to {email} when it ships.
-    </p>
-    <p class="fine">Order {s.id.slice(-8).toUpperCase()}</p>
+
+      {addr && (
+        <>
+          <div class="label" style="margin-top:2em">Shipping to</div>
+          <div class="rx">
+            <span>{name}</span>
+            <span>{addr.line1}</span>
+            {addr.line2 && <span>{addr.line2}</span>}
+            <span>{addr.city}{addr.state ? `, ${addr.state}` : ''} {addr.postal_code}</span>
+            <span>{addr.country}</span>
+          </div>
+        </>
+      )}
+
+      <div class="fine" style="margin-top:2.2em">
+        Made to order by hand in London. Allow two to three weeks. A note goes to {email} when it ships.
+      </div>
+      <div class="fine">Order {s.id.slice(-8).toUpperCase()}</div>
+    </div>
   </div>
 </Site>
