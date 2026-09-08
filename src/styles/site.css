@@ -147,6 +147,13 @@ body[data-open="true"] .panel{opacity:1;transform:none;pointer-events:auto}
 .panel.read .eyebrow{margin-bottom:1.6em}
 .panel.read .signup{margin:2.6em auto 1em}
 .panel.read .said{text-align:center}
+/* the receipt: one column, the print small in its frame, the facts under it */
+.receipt{display:flex;flex-direction:column;align-items:center;gap:1.1em}
+.receipt .mount{max-width:200px;margin:.4em 0 .6em}
+.receipt .mount img{max-height:220px}
+.receipt h2{margin:0}
+.receipt .lede{margin:0;line-height:1.7}
+.receipt .fine{margin:0;line-height:1.8}
 /* the bio: intro centred, then the index on the loader's spine, wider than the letter */
 .panel.read .bio-lede{font-size:clamp(19px,1.9vw,24px);line-height:1.5;max-width:34ch;margin-bottom:2.4em}
 .panel.read .index{text-align:left;max-width:none;width:min(92vw,720px);margin:0 auto}

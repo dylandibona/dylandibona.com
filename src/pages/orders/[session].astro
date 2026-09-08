@@ -1,0 +1,62 @@
+---
+export const prerender = false;
+
+import { Image } from 'astro:assets';
+import Site from '../../layouts/Site.astro';
+import { findPrint } from '../../lib/prints';
+import { SIZES, FRAMES, money } from '../../lib/pricing';
+import { stripe } from '../../lib/stripe';
+
+/**
+ * The receipt. Stripe is the system of record: this page reads the session
+ * back by id and shows what was bought and where it is going. A real URL, so
+ * the confirmation email can be one link, and later the dispatch email too.
+ * An unknown or unpaid session goes back to the prints.
+ */
+const id = Astro.params.session ?? '';
+let s: any = null;
+try {
+  if (/^cs_/.test(id)) s = await stripe().checkout.sessions.retrieve(id);
+} catch {}
+if (!s || s.payment_status !== 'paid') return Astro.redirect('/prints', 302);
+
+const print = findPrint(s.metadata?.slug ?? '');
+const size  = SIZES.find((x) => x.code === s.metadata?.size);
+const frame = FRAMES.find((x) => x.code === s.metadata?.frame);
+const ship  = s.shipping_details ?? s.collected_information?.shipping_details ?? null;
+const addr  = ship?.address;
+const name  = ship?.name ?? s.customer_details?.name ?? '';
+const email = s.customer_details?.email ?? '';
+const amount = money(s.amount_total ?? 0);
+---
+<Site title="Order received — Dylan James DiBona" description="Order received."
+      crumbs={[{ label: 'Prints', href: '/prints' }, { label: 'Order' }]} open read>
+  <div class="receipt">
+    <div class="eyebrow">Received</div>
+    {print && (
+      <div class="mount mount-sm" data-frame={frame?.code ?? 'black'}>
+        <span class="rail rail-t"></span><span class="rail rail-r"></span>
+        <span class="rail rail-b"></span><span class="rail rail-l"></span>
+        <Image src={print.image} alt={print.title} widths={[280, 560]} sizes="200px" quality={78} />
+      </div>
+    )}
+    <h2>{print?.title ?? 'Your print'}</h2>
+    <p class="lede">
+      {size && <>{size.cm} cm · {size.inches} in<br /></>}
+      {frame && (frame.code === 'none' ? 'Unframed, ships rolled' : `Framed in ${frame.label.toLowerCase()}`)}
+      <br />{amount}
+    </p>
+    {addr && (
+      <p class="fine">
+        {name}<br />
+        {addr.line1}{addr.line2 && <><br />{addr.line2}</>}<br />
+        {addr.city}{addr.state ? `, ${addr.state}` : ''} {addr.postal_code}<br />
+        {addr.country}
+      </p>
+    )}
+    <p class="fine">
+      Printed to order in London. Allow two to three weeks. A note goes to {email} when it ships.
+    </p>
+    <p class="fine">Order {s.id.slice(-8).toUpperCase()}</p>
+  </div>
+</Site>
