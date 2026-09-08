@@ -1,0 +1,78 @@
+---
+/**
+ * The name, set one letter at a time while the first photograph decodes.
+ * Gandur New, the same face as the masthead, so the loader is the masthead
+ * being assembled and then handed to the top-left corner.
+ *
+ * Each letter arrives with a small overshoot, like type being set rather than
+ * a cartoon bounce. The hairline beneath is a real progress bar: it fills as
+ * letters land, and the loader clears only once the name is complete AND the
+ * hero has decoded. It force-clears at six seconds regardless.
+ *
+ * transition:persist means it only ever runs on the first page of a visit.
+ */
+const NAME = 'Dylan James DiBona';
+const WORDS = NAME.split(' ');
+---
+<div class="boot" id="boot" transition:persist="boot">
+  <div class="boot-name" id="bootName" aria-label={NAME}>
+    {WORDS.map((w, wi) => (
+      <span class="w">{[...w].map((ch) => <span class="ch" aria-hidden="true">{ch}</span>)}{wi < WORDS.length - 1 && <span class="ch sp" aria-hidden="true">&nbsp;</span>}</span>
+    ))}
+  </div>
+  <div class="boot-rule"><span id="bootRule"></span></div>
+</div>
+
+<script is:inline>
+  (() => {
+    const boot = document.getElementById('boot');
+    if (!boot) return;
+
+    // The loader is persisted across navigations, but a route entered directly
+    // still ships its own copy of this markup. Once the visit has booted, any
+    // fresh copy must be taken out immediately — otherwise it sits there as an
+    // opaque black sheet swallowing every click.
+    // Booted state also lives in sessionStorage, so a hard reload part-way
+    // through a visit does not replay the whole timeline. A genuinely new
+    // visit — new tab, new session — still gets it.
+    let seen = false;
+    try { seen = sessionStorage.getItem('booted') === '1'; } catch {}
+    if (window.__booted || seen) { boot.classList.add('done', 'gone'); return; }
+    window.__booted = true;
+    try { sessionStorage.setItem('booted', '1'); } catch {}
+
+    const letters = [...boot.querySelectorAll('.ch:not(.sp)')];
+    const rule = document.getElementById('bootRule');
+    let heroReady = false, nameDone = false;
+
+    function clear() {
+      if (!(heroReady && nameDone)) return;
+      boot.classList.add('done');
+      setTimeout(() => boot.classList.add('gone'), 900);
+    }
+    // The hero controller calls this once the first photograph has decoded.
+    window.__bootHeroReady = () => { heroReady = true; clear(); };
+
+    if (matchMedia('(prefers-reduced-motion:reduce)').matches) {
+      letters.forEach((l) => l.classList.add('in'));
+      rule.style.transform = 'scaleX(1)';
+      nameDone = true; clear();
+    } else {
+      // Wait for the faces (the layout's promise, capped at 1.4s) before
+      // setting a single letter, or the first few land in the fallback.
+      (window.__fonts ?? Promise.resolve()).then(() => {
+        let i = 0;
+        const STEP = 62;
+        (function set() {
+          letters[i].classList.add('in');
+          rule.style.transform = `scaleX(${(i + 1) / letters.length})`;
+          if (++i < letters.length) setTimeout(set, STEP);
+          else setTimeout(() => { nameDone = true; clear(); }, 620);
+        })();
+      });
+    }
+
+    // A loader must never be able to trap the site, whatever happens upstream.
+    setTimeout(() => { heroReady = nameDone = true; clear(); }, 6000);
+  })();
+</script>

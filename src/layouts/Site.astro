@@ -1,0 +1,408 @@
+---
+/**
+ * The one layout. Every route renders inside it.
+ *
+ * The rule from v16: real URLs, no page reload, no modals. Astro's ClientRouter
+ * swaps the document while `transition:persist` keeps the photograph, its rotation
+ * timer and the loader alive across navigations. Opening a section never takes the
+ * photograph off screen — it just blurs behind a veil.
+ */
+import { ClientRouter } from 'astro:transitions';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { HEROES } from '../lib/prints';
+import Loader from '../components/Loader.astro';
+import Masthead from '../components/Masthead.astro';
+import '../styles/site.css';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  /** Home is the resting state. Every other route opens over the photograph. */
+  open?: boolean;
+  /** Breadcrumb after the name, e.g. [{label:'Prints', href:'/prints'}, {label:'Escorca'}] */
+  crumbs?: { label: string; href?: string }[];
+  /** Share image. A print page passes its photograph; everything else gets a hero. */
+  image?: ImageMetadata;
+  /** Pages you read sit centred, like the loader. Pages you browse hang left. */
+  read?: boolean;
+}
+
+const {
+  title = 'Dylan James DiBona',
+  description = 'Photographs, and prints of them.',
+  open = false,
+  crumbs = [],
+  image,
+  read = false,
+} = Astro.props;
+
+// Pre-generate the hero variants at build time so the client only ever gets optimised files.
+const heroes = await Promise.all(
+  HEROES.map(async (p) => ({
+    slug: p.slug,
+    title: p.title,
+    where: p.where,
+    src: (await getImage({ src: p.image, width: 2400, format: 'webp', quality: 82 })).src,
+  }))
+);
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://dylandibona.com');
+
+// Share card. Prints pass their own photograph; any other page falls back to the
+// first hero. 1200 wide, JPEG, because the previewers that matter still choke on webp.
+const ogSrc = image ?? HEROES[0]?.image;
+const og = ogSrc
+  ? await getImage({ src: ogSrc, width: 1200, format: 'jpeg', quality: 80 })
+  : null;
+const ogUrl = og ? new URL(og.src, canonical).href : null;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical.href} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonical.href} />
+  {ogUrl && <meta property="og:image" content={ogUrl} />}
+  {og && <meta property="og:image:width" content={String(og.attributes.width)} />}
+  {og && <meta property="og:image:height" content={String(og.attributes.height)} />}
+  <meta name="twitter:card" content={ogUrl ? 'summary_large_image' : 'summary'} />
+  {ogUrl && <meta name="twitter:image" content={ogUrl} />}
+  <link rel="icon" href="/favicon.ico" sizes="32x32" />
+  <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="/icon-180.png" />
+  <link rel="preconnect" href="https://use.typekit.net" crossorigin />
+  {/* Loaded without blocking render. A render-blocking stylesheet also blocks the
+      inline scripts below it, so a slow Adobe response would leave the loader
+      unable to paint at all — a black screen for as long as the request hangs. */}
+  {/* No text paints until the faces are in, or 1.4s has passed, whichever is
+      first. The page is black either way, so a late kit costs a beat of black
+      rather than a flash of the fallback face. window.__fonts is the promise
+      the loader waits on before setting the first letter. */}
+  <script is:inline>
+    document.documentElement.classList.add('fonts-pending');
+    window.__fonts = new Promise((done) => {
+      let settled = false;
+      const ok = () => { if (settled) return; settled = true;
+        document.documentElement.classList.remove('fonts-pending'); done(); };
+      window.__fontsCssReady = () => {
+        const f = document.fonts;
+        if (!f) return ok();
+        Promise.all([f.load('300 1em "gandur-new"'), f.load('300 1em "ferryman"')])
+          .then(() => f.ready).then(ok, ok);
+      };
+      setTimeout(ok, 1400);
+    });
+  </script>
+  <link rel="preload" as="style" href="https://use.typekit.net/yfz0paf.css"
+        onload="this.rel='stylesheet';window.__fontsCssReady&&window.__fontsCssReady()" />
+  <noscript><link rel="stylesheet" href="https://use.typekit.net/yfz0paf.css" /></noscript>
+  <ClientRouter />
+</head>
+<body data-open={open ? 'true' : 'false'}>
+  <Loader />
+
+  <div class="stage" id="stage" transition:persist="stage"></div>
+  <div class="track" id="track" transition:persist="track"><div class="bar" id="bar"></div></div>
+  <div class="veil" data-home-link></div>
+  <div class="scrim-t"></div><div class="scrim-b"></div>
+
+  <Masthead />
+
+  {/* The name sits top left at all times, on the homepage and inside every
+      section, with the module appended after it. It is the one fixed point. */}
+  <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="/">Dylan James DiBona</a>
+    {crumbs.map((c) => (
+      <>
+        <span class="sep" aria-hidden="true">/</span>
+        {c.href ? <a href={c.href}>{c.label}</a> : <span aria-current="page">{c.label}</span>}
+      </>
+    ))}
+  </nav>
+
+  <div class="chrome">
+    <a class="close" href="/" aria-label="Close">✕</a>
+  </div>
+
+  <main class:list={['panel', { read }]} id="panel"><div class="wrap"><slot /></div></main>
+
+  <script is:inline define:vars={{ heroes }}>
+    // One controller for the life of the tab. transition:persist keeps the stage
+    // element, so re-running this on every navigation would stack timers.
+    if (!window.__hero) {
+      window.__hero = (() => {
+        const HOLD = 45000;
+        let current = null, timer = null, paused = false, fails = 0;
+
+        const stage = () => document.getElementById('stage');
+        const bar = () => document.getElementById('bar');
+
+        // ── The photograph is drawn, not placed. ──────────────────────────
+        // A WebGL canvas. The photograph is a texture; the shader does two
+        // things. One: a slow flow, as if a sheet of water lay over the print,
+        // drifting, very faintly magnifying and bending what is underneath.
+        // Two: the arrival. A new photograph comes in as large blocks that
+        // shrink to sharp; the current one breaks back into blocks before the
+        // next arrives. Same shader, one uniform for block size.
+        // Falls back to a plain 2D draw with no flow if WebGL is unavailable.
+        const pix = (() => {
+          const MAX = 96, IN = 2200, OUT = 550;
+          const still = matchMedia('(prefers-reduced-motion:reduce)').matches;
+          let cv, gl, prog, tex, U = {}, W = 0, H = 0, dpr = 1;
+          let img = null, pending = null, phase = 'idle', t0 = 0, from = MAX, to = 1, block = 1, raf = 0;
+          let fallback = null;             // 2D context if WebGL is not there
+          const T0 = performance.now();
+
+          const VS = `attribute vec2 p; varying vec2 v; void main(){ v = p * .5 + .5; gl_Position = vec4(p, 0., 1.); }`;
+          const FS = `
+            precision highp float;
+            varying vec2 v;
+            uniform sampler2D img;
+            uniform vec2 res;      // canvas px
+            uniform vec2 isz;      // image px
+            uniform float t;       // seconds
+            uniform float block;   // px; 1 = sharp
+            uniform float flow;    // 0..1, how much water
+
+            // simplex-ish value noise, cheap and smooth enough for this
+            vec3 mod289(vec3 x){ return x - floor(x * (1. / 289.)) * 289.; }
+            vec2 mod289(vec2 x){ return x - floor(x * (1. / 289.)) * 289.; }
+            vec3 permute(vec3 x){ return mod289(((x * 34.) + 1.) * x); }
+            float snoise(vec2 v){
+              const vec4 C = vec4(.211324865405187, .366025403784439, -.577350269189626, .024390243902439);
+              vec2 i = floor(v + dot(v, C.yy)); vec2 x0 = v - i + dot(i, C.xx);
+              vec2 i1 = (x0.x > x0.y) ? vec2(1., 0.) : vec2(0., 1.);
+              vec4 x12 = x0.xyxy + C.xxzz; x12.xy -= i1;
+              i = mod289(i);
+              vec3 p = permute(permute(i.y + vec3(0., i1.y, 1.)) + i.x + vec3(0., i1.x, 1.));
+              vec3 m = max(.5 - vec3(dot(x0, x0), dot(x12.xy, x12.xy), dot(x12.zw, x12.zw)), 0.); m = m * m; m = m * m;
+              vec3 x = 2. * fract(p * C.www) - 1.; vec3 h = abs(x) - .5; vec3 ox = floor(x + .5); vec3 a0 = x - ox;
+              m *= 1.79284291400159 - .85373472095314 * (a0 * a0 + h * h);
+              vec3 g; g.x = a0.x * x0.x + h.x * x0.y; g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+              return 130. * dot(m, g);
+            }
+
+            void main(){
+              vec2 uv = vec2(v.x, 1. - v.y);
+              // the arrival: quantise to blocks in canvas pixels
+              if (block > 1.05) {
+                vec2 cells = res / block;
+                uv = (floor(uv * cells) + .5) / cells;
+              }
+              // the water: two slow layers of noise bend the lookup slightly,
+              // and a broad, even slower swell magnifies a little as it passes
+              if (flow > 0.) {
+                vec2 q = uv * vec2(res.x / res.y, 1.);
+                float n1 = snoise(q * 1.4 + vec2(t * .035, -t * .025));
+                float n2 = snoise(q * 2.6 - vec2(t * .02,  t * .04));
+                vec2 bend = vec2(n1, n2) * .011 * flow;
+                float swell = snoise(q * .6 + vec2(t * .015, t * .01));
+                vec2 c = vec2(.5 + swell * .25, .5 - swell * .2);
+                uv = c + (uv - c) * (1. - swell * .035 * flow);
+                uv += bend;
+              }
+              // cover-fit the image into the canvas
+              float sc = max(res.x / isz.x, res.y / isz.y);
+              vec2 fit = isz * sc;                            // drawn size in px
+              vec2 off = (res - fit) * .5;
+              vec2 p = (uv * res - off) / fit;
+              p = clamp(p, 0., 1.);
+              gl_FragColor = texture2D(img, p);
+            }`;
+
+          function ensure() {
+            const st = stage(); if (!st) return false;
+            if (!cv) {
+              cv = document.createElement('canvas'); cv.className = 'pix';
+              st.appendChild(cv);
+              gl = cv.getContext('webgl', { alpha: false, antialias: false, powerPreference: 'low-power' });
+              if (gl) {
+                const sh = (k, src) => { const o = gl.createShader(k); gl.shaderSource(o, src); gl.compileShader(o); return o; };
+                prog = gl.createProgram();
+                gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
+                gl.linkProgram(prog);
+                if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { gl = null; }
+              }
+              if (gl) {
+                gl.useProgram(prog);
+                const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+                const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc);
+                gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+                for (const n of ['img', 'res', 'isz', 't', 'block', 'flow']) U[n] = gl.getUniformLocation(prog, n);
+                tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                gl.uniform1i(U.img, 0);
+              } else {
+                fallback = cv.getContext('2d', { alpha: false });
+              }
+              addEventListener('resize', size, { passive: true });
+            }
+            size();
+            return true;
+          }
+          function size() {
+            const st = stage(); if (!st) return;
+            const r = st.getBoundingClientRect();
+            dpr = Math.min(devicePixelRatio || 1, 2);
+            const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+            if (w !== W || h !== H) { W = cv.width = w; H = cv.height = h; if (gl) gl.viewport(0, 0, W, H); }
+          }
+          const ease = (x) => 1 - Math.pow(1 - x, 3);
+
+          function upload() {
+            if (!gl || !img) return;
+            gl.bindTexture(gl.TEXTURE_2D, tex);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
+            gl.uniform2f(U.isz, img.naturalWidth, img.naturalHeight);
+          }
+          function draw(now) {
+            if (!img) return;
+            if (gl) {
+              gl.uniform2f(U.res, W, H);
+              gl.uniform1f(U.t, (now - T0) / 1000);
+              gl.uniform1f(U.block, block);
+              gl.uniform1f(U.flow, still ? 0 : 1);
+              gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            } else {
+              const c = fallback;
+              c.imageSmoothingEnabled = true;
+              const s = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+              c.drawImage(img, (W - img.naturalWidth * s) / 2, (H - img.naturalHeight * s) / 2, img.naturalWidth * s, img.naturalHeight * s);
+            }
+          }
+
+          function frame(now) {
+            raf = 0;
+            if (phase === 'in' || phase === 'out') {
+              const dur = phase === 'in' ? IN : OUT;
+              const tt = Math.min(1, (now - t0) / dur);
+              const e = phase === 'in' ? ease(tt) : tt * tt;
+              block = Math.exp(Math.log(from) + (Math.log(to) - Math.log(from)) * e);
+              draw(now);
+              if (tt < 1) { raf = requestAnimationFrame(frame); return; }
+              if (phase === 'in') phase = 'idle'; else { swap(); return; }
+            }
+            if (phase === 'idle') {
+              draw(now);
+              // the water only moves on the homepage; behind the veil it rests
+              if (gl && !still && !paused) raf = requestAnimationFrame(frame);
+            }
+          }
+          const go = () => { if (!raf) raf = requestAnimationFrame(frame); };
+
+          function swap() {
+            img = pending; pending = null;
+            upload();
+            if (still) { phase = 'idle'; block = 1; draw(performance.now()); return; }
+            from = MAX; to = 1; block = MAX; phase = 'in'; t0 = performance.now(); go();
+          }
+          function show(next) {
+            if (!ensure()) return;
+            pending = next;
+            if (img && !still && gl) { from = block; to = MAX; phase = 'out'; t0 = performance.now(); go(); }
+            else swap();
+          }
+          return { show, wake: go };
+        })();
+
+        function paint(rec) {
+          const st = stage(); if (!st) return;
+          const img = new Image();
+          img.src = rec.src; img.alt = '';
+          img.onerror = () => { if (++fails < heroes.length) next(); else window.__bootHeroReady?.(); };
+          img.onload = () => {
+            fails = 0;
+            pix.show(img);
+            current = rec;
+            window.__bootHeroReady?.();
+            caption();
+          };
+        }
+
+        function caption() {
+          const el = document.getElementById('caption');
+          if (!el || !current) return;
+          el.href = '/prints/' + current.slug;
+          el.innerHTML =
+            (current.title + (current.where ? ': ' + current.where : '')) +
+            '<span class="buy">Available as a print &rarr;</span>';
+        }
+
+        function next() {
+          let pick = heroes[Math.floor(Math.random() * heroes.length)];
+          if (heroes.length > 1)
+            while (current && pick.slug === current.slug)
+              pick = heroes[Math.floor(Math.random() * heroes.length)];
+          paint(pick);
+        }
+
+        function start() {
+          const b = bar(); if (!b) return;
+          clearTimeout(timer);
+          b.style.transition = 'none';
+          b.style.transform = 'scaleX(1)';
+          void b.offsetWidth;                       // force reflow so the reset lands
+          b.style.transition = `transform ${HOLD}ms linear`;
+          b.style.transform = 'scaleX(0)';
+          timer = setTimeout(() => { next(); start(); }, HOLD);
+        }
+
+        function freeze() {
+          clearTimeout(timer);
+          const b = bar(); if (!b) return;
+          const w = b.getBoundingClientRect().width;
+          const full = b.parentElement.getBoundingClientRect().width;
+          b.style.transition = 'none';
+          b.style.transform = `scaleX(${full ? w / full : 1})`;
+        }
+
+        // Rotation runs on the homepage only; it pauses while a section is open.
+        function sync() {
+          caption();
+          const isOpen = document.body.dataset.open === 'true';
+          if (isOpen && !paused) { paused = true; freeze(); }
+          else if (!isOpen && paused) { paused = false; start(); pix.wake(); }
+        }
+
+        next(); start();
+        return { sync };
+      })();
+    }
+    window.__hero.sync();
+    document.addEventListener('astro:after-swap', () => window.__hero.sync());
+  </script>
+
+  <script>
+    import { navigate } from 'astro:transitions/client';
+    // location.assign() is a full page load: it resets the tab and replays the
+    // loader. navigate() stays client-side, so the photograph keeps rotating
+    // and the loader stays gone.
+    // Only the backdrop dismisses. The old rule — any inert part of the panel
+    // returns home — is fine on a page you only read, but the print page has
+    // size rows, four frame swatches and a buy button, and a missed click
+    // throwing the buyer back to the homepage costs a sale. Close is the ✕,
+    // Escape, or the breadcrumb.
+    function wire() {
+      document.querySelector('[data-home-link]')?.addEventListener('click', () => {
+        if (document.body.dataset.open === 'true') navigate('/');
+      });
+    }
+    wire();
+    document.addEventListener('astro:page-load', wire);
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.body.dataset.open === 'true') navigate('/');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+---
+import Site from '../layouts/Site.astro';
+
+/**
+ * The business card. One paragraph in Dylan's words, then an index of facts.
+ * A read page, so it sits centred over the photograph like The Letter, with
+ * the index on the loader's spine: term right of the axis, fact left of it.
+ */
+type Fact = { text: string; href?: string; muted?: boolean };
+type Entry = { term: string; facts: Fact[] };
+
+const INTRO =
+  'A borderless creative director, team leader, collaborator, and all-around hands-on ' +
+  'partner who works with brands, agencies, publishers, and inspired individuals ' +
+  'to make new things real.';
+
+const INDEX: Entry[] = [
+  { term: 'Find me', facts: [{ text: 'New Orleans' }, { text: 'Nice' }] },
+  { term: 'Works', facts: [
+    { text: 'Monday + Partners, Chief Creative Partner', href: 'https://mondayandpartners.com' },
+    { text: 'Natrx, Brand and Marketing Lead', href: 'https://natrx.io' },
+  ]},
+  { term: 'Agency experience', facts: [
+    { text: 'McCann Erickson San Francisco, 215 McCann, BBDO San Francisco, Duncan/Channon, Foote Cone & Belding, Publicis London, Team Detroit' },
+    { text: 'Built in-house agencies inside publishers: The Atlantic, Esquire, Car and Driver, Road & Track, Popular Mechanics' },
+  ]},
+  { term: 'Brand experience', facts: [
+    { text: 'Microsoft, Louisiana Innovation, Twitter, Amazon, Cloudflare, Ray-Ban, Transport for London, Wells Fargo, BMW, DocuSign' },
+    { text: 'and many others', muted: true },
+  ]},
+  { term: 'Right to work in', facts: [{ text: 'United States, European Union, United Kingdom' }] },
+  { term: 'Languages', facts: [{ text: 'English' }, { text: 'French, poorly' }] },
+  { term: 'Reachable', facts: [
+    { text: 'dylan@dylandibona.com', href: 'mailto:dylan@dylandibona.com' },
+    { text: '+1 415 341 2855', href: 'tel:+14153412855' },
+    { text: '+33 7 49 08 13 80', href: 'tel:+33749081380' },
+    { text: '+44 7884 087851', href: 'tel:+447884087851' },
+  ]},
+];
+---
+<Site
+  title="Bio — Dylan James DiBona"
+  description={INTRO}
+  crumbs={[{ label: 'Bio' }]}
+  open
+  read
+>
+  <p class="lede bio-lede">{INTRO}</p>
+
+  <dl class="index">
+    {INDEX.map((e) => (
+      <div class="index-row">
+        <dt>{e.term}</dt>
+        <dd>
+          {e.facts.map((f) =>
+            f.href
+              ? <a href={f.href} class:list={{ muted: f.muted }}>{f.text}</a>
+              : <span class:list={{ muted: f.muted }}>{f.text}</span>
+          )}
+        </dd>
+      </div>
+    ))}
+  </dl>
+</Site>

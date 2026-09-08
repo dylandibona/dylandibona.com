@@ -1,0 +1,49 @@
+---
+import Site from '../layouts/Site.astro';
+// Real recently-played, via the existing /api/spotify endpoint. Fetched on the
+// client so the page is never blocked by Spotify being slow or down.
+---
+<Site title="Listening — Dylan James DiBona" description="What has been on lately." crumbs={[{ label: "Listening" }]} open>
+  {/* Album covers are pictures, so they get the same grid as the prints: a
+      contact sheet, not a playlist. The eyebrow is the only heading. */}
+  <div class="eyebrow">Last 10 from Spotify. <a href="https://open.spotify.com/user/dylandibona" target="_blank" rel="noopener">Click to follow ↗</a></div>
+  <ul class="covers" id="tracks"></ul>
+  <div class="fine" id="note">Loading…</div>
+
+  <div class="eyebrow" id="plHead" hidden>Playlists</div>
+  <ul class="covers covers-4" id="playlists"></ul>
+</Site>
+
+<script>
+  async function loadTracks() {
+    const list = document.getElementById('tracks');
+    const note = document.getElementById('note');
+    const plHead = document.getElementById('plHead');
+    const pl = document.getElementById('playlists');
+    if (!list || !note || !plHead || !pl) return;
+    try {
+      const res = await fetch('/api/spotify');
+      if (!res.ok) throw new Error(String(res.status));
+      const { tracks, playlists } = await res.json();
+      if (playlists?.length) {
+        pl.innerHTML = playlists.map((p: any) => `
+          <li><a class="cover" href="${p.spotifyUrl}" target="_blank" rel="noopener">
+            <figure>${p.cover ? `<img src="${p.cover}" alt="" loading="lazy" decoding="async" />` : ''}</figure>
+            <figcaption><span>${p.name}</span></figcaption>
+          </a></li>`).join('');
+        plHead.hidden = false;
+      }
+      if (!tracks?.length) throw new Error('empty');
+      list.innerHTML = tracks.slice(0, 10).map((t: any) => `
+        <li><a class="cover" href="${t.spotifyUrl}" target="_blank" rel="noopener">
+          <figure><img src="${t.albumArt}" alt="" loading="lazy" decoding="async" /></figure>
+          <figcaption><span>${t.title}</span><em>${t.artist}</em></figcaption>
+        </a></li>`).join('');
+      note.textContent = '';
+    } catch {
+      note.textContent = 'Spotify is not answering right now.';
+    }
+  }
+  loadTracks();
+  document.addEventListener('astro:page-load', loadTracks);
+</script>

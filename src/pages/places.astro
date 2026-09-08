@@ -1,0 +1,31 @@
+---
+import { Image } from 'astro:assets';
+import Site from '../layouts/Site.astro';
+import sf from '../assets/places/san-francisco.png';
+import nice from '../assets/places/nice.jpg';
+---
+<Site
+  title="Places to Stay — Dylan James DiBona"
+  description="A studio in San Francisco and an apartment in Nice."
+  crumbs={[{ label: 'Places to Stay' }]}
+  open
+>
+  <div class="stay">
+    <article>
+      <h2>A Studio in San Francisco</h2>
+      <figure><Image src={sf} alt="Studio Zero, San Francisco" widths={[600, 1000]} sizes="(max-width:820px) 92vw, 45vw" /></figure>
+      <p>A private studio in the middle of the Mission District with access to the best the city has
+      to offer. Easy access to BART (subway) to/from the airport. Book direct with me. Click for availability.</p>
+      <a class="ghost" href="https://studiozerosf.com" target="_blank" rel="noopener">Studio Zero →</a>
+    </article>
+
+    <article>
+      <h2>An Apartment in Nice</h2>
+      <figure><Image src={nice} alt="The apartment, Nice" widths={[600, 1000]} sizes="(max-width:820px) 92vw, 45vw" /></figure>
+      <p>Two bedrooms and a balcony near the port, a few minutes from Riquier station. Sleeps four.
+      The entire Riviera is moments away by train. AC, Wifi, and easy public transit. For friends
+      and family only.</p>
+      <a class="ghost" href="https://ruearson.carrd.co" target="_blank" rel="noopener">42 Rue Arson →</a>
+    </article>
+  </div>
+</Site>

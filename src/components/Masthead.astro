@@ -1,0 +1,62 @@
+---
+/**
+ * Name, hairline, navigation. Bottom left, reading as a masthead rather than
+ * a logo in a corner. Capitals are reserved for small labels, never navigation.
+ */
+const NAV = [
+  { href: '/prints', label: 'Prints' },
+  { href: '/letter', label: 'The Letter' },
+  { href: '/places', label: 'Places to Stay' },
+  { href: '/listening', label: 'Listening' },
+  { href: '/bio', label: 'Bio' },
+];
+---
+<div class="home" id="home">
+  {/* The name lives top left, in the layout. This is the index, plus contact.
+      On desktop contact pins top right and the index sits bottom left. On a
+      phone both fold into one sheet behind a single mark, bottom left. */}
+  <div class="masthead" id="masthead">
+    <button class="mark" id="mark" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+      <span></span><span></span>
+    </button>
+    <div class="menu" id="menu">
+      <nav>
+        <ol>
+          {NAV.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+          <li>
+            <a href="https://moodboard.dylandibona.com" target="_blank" rel="noopener">
+              Moodboard <span class="ext">↗</span>
+            </a>
+          </li>
+        </ol>
+      </nav>
+      <div class="contact">
+        <div><a href="mailto:dylan@dylandibona.com">dylan@dylandibona.com</a></div>
+        <div><a href="tel:+14153412855">+1 415 341 2855</a></div>
+        <div><a href="tel:+33749081380">+33 7 49 08 13 80</a></div>
+        <div><a href="tel:+447884087851">+44 7884 087851</a></div>
+      </div>
+    </div>
+  </div>
+
+  <a class="caption" id="caption" href="/prints"></a>
+</div>
+
+<script>
+  // The mark only exists on a phone. It toggles the sheet; a tap anywhere
+  // else, or Escape, closes it. Sized in CSS, so no JS on desktop at all.
+  function wireMark() {
+    const mark = document.getElementById('mark');
+    const home = document.getElementById('home');
+    if (!mark || !home || mark.dataset.wired) return;
+    mark.dataset.wired = '1';
+    const set = (on: boolean) => { home.classList.toggle('open', on); mark.setAttribute('aria-expanded', String(on)); };
+    mark.addEventListener('click', (e) => { e.stopPropagation(); set(!home.classList.contains('open')); });
+    document.addEventListener('click', (e) => {
+      if (home.classList.contains('open') && !(e.target as Element).closest('#menu')) set(false);
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') set(false); });
+  }
+  wireMark();
+  document.addEventListener('astro:page-load', wireMark);
+</script>

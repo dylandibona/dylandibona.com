@@ -1,0 +1,179 @@
+---
+import { Image } from 'astro:assets';
+import Site from '../../layouts/Site.astro';
+import { PRINTS } from '../../lib/prints';
+import { SIZES, FRAMES, DEFAULT_SIZE, DEFAULT_FRAME, priceOf, money,
+         PRINT_NOTE, FRAMED_NOTE, PRINT_ONLY_NOTE } from '../../lib/pricing';
+
+export function getStaticPaths() {
+  return PRINTS.map((print) => ({ params: { slug: print.slug }, props: { print } }));
+}
+const { print } = Astro.props;
+const opening = priceOf(SIZES[DEFAULT_SIZE], DEFAULT_FRAME);
+---
+<Site
+  title={`${print.title} — a print by Dylan James DiBona`}
+  description={`${print.title}${print.where ? ', ' + print.where : ''}. Giclée on Hahnemühle Photo Rag, made to order.`}
+  crumbs={[{ label: "Prints", href: "/prints" }, { label: print.title }]}
+  image={print.image}
+  open
+>
+  <div class="detail">
+    <div class="shot" id="shot">
+      {/* the frame and mat are drawn around the photograph, not composited into it */}
+      <div class="mount" id="mount" data-frame={DEFAULT_FRAME}>
+        <span class="rail rail-t"></span><span class="rail rail-r"></span>
+        <span class="rail rail-b"></span><span class="rail rail-l"></span>
+        <Image src={print.image} alt={print.title} widths={[900, 1400]}
+               sizes="(max-width:920px) 88vw, 55vw" quality={82} />
+      </div>
+    </div>
+
+    <div class="buy">
+      {print.where && <div class="eyebrow">{print.where}</div>}
+      <h2>{print.title}</h2>
+
+      <div class="sizes-head">
+        <span class="label">Size</span>
+        <div class="units" id="units">
+          <button type="button" data-unit="cm" aria-selected="true">cm</button>
+          <button type="button" data-unit="in" aria-selected="false">in</button>
+        </div>
+      </div>
+      <ul class="sizes" id="sizes">
+        {SIZES.map((s, i) => (
+          <li aria-selected={i === DEFAULT_SIZE ? 'true' : 'false'} data-i={i}
+              data-cm={s.cm} data-in={s.inches}>
+            <button type="button">
+              <span class="dims">{s.cm} <span class="u">cm</span></span>
+              <span class="amt">{money(priceOf(s, DEFAULT_FRAME))}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      <div class="frames" id="frames">
+        {FRAMES.map((f) => (
+          <button type="button" data-frame={f.code} title={f.label}
+                  aria-selected={f.code === DEFAULT_FRAME ? 'true' : 'false'}>
+            <span class={`sw sw-${f.code}`}></span>
+            <em>{f.code === 'none' ? 'None' : f.label}</em>
+          </button>
+        ))}
+      </div>
+
+      <button class="buy-btn" id="buy" data-slug={print.slug}>Buy — {money(opening)}</button>
+      <div class="fine" id="ship">{FRAMED_NOTE}<br>Dispatched in 2–5 days.</div>
+      <div class="fine">{PRINT_NOTE}</div>
+    </div>
+  </div>
+</Site>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+  import { SIZES, DEFAULT_SIZE, DEFAULT_FRAME, priceOf, money,
+           FRAMED_NOTE, PRINT_ONLY_NOTE, type FrameCode } from '../../lib/pricing';
+
+  function wire() {
+    const sizes  = document.getElementById('sizes');
+    const frames = document.getElementById('frames');
+    const units  = document.getElementById('units');
+    const mount  = document.getElementById('mount');
+    const buy    = document.getElementById('buy') as HTMLButtonElement | null;
+    const ship   = document.getElementById('ship');
+    if (!sizes || !frames || !mount || !buy || !ship) return;
+
+    let sizeIndex = DEFAULT_SIZE;
+    let frame: FrameCode = DEFAULT_FRAME;
+    // Default to whichever unit the visitor's locale actually uses, then
+    // remember whatever they pick.
+    let unit: 'cm' | 'in' = /^en-(US|LR)|^my/i.test(navigator.language || '') ? 'in' : 'cm';
+    try { const saved = localStorage.getItem('unit'); if (saved === 'cm' || saved === 'in') unit = saved; } catch {}
+
+    function paint() {
+      // every row reprices when the frame changes, so the ladder always shows
+      // what this buyer would actually pay
+      sizes.querySelectorAll('li').forEach((li) => {
+        const i = Number(li.dataset.i);
+        li.querySelector('.dims')!.innerHTML =
+          `${unit === 'cm' ? li.dataset.cm : li.dataset.in} <span class="u">${unit}</span>`;
+        li.querySelector('.amt')!.textContent = money(priceOf(SIZES[i], frame));
+        li.setAttribute('aria-selected', String(i === sizeIndex));
+      });
+      units?.querySelectorAll('button').forEach((b) =>
+        b.setAttribute('aria-selected', String(b.dataset.unit === unit)));
+      frames.querySelectorAll('button').forEach((b) =>
+        b.setAttribute('aria-selected', String(b.dataset.frame === frame)));
+      mount.dataset.frame = frame;
+      buy.textContent = 'Buy — ' + money(priceOf(SIZES[sizeIndex], frame));
+      ship.innerHTML = (frame === 'none' ? PRINT_ONLY_NOTE : FRAMED_NOTE) + '<br>Dispatched in 2–5 days.';
+    }
+
+    sizes.querySelectorAll('li').forEach((li) =>
+      li.addEventListener('click', () => { sizeIndex = Number(li.dataset.i); paint(); }));
+    frames.querySelectorAll('button').forEach((b) =>
+      b.addEventListener('click', () => { frame = b.dataset.frame as FrameCode; paint(); }));
+    units?.querySelectorAll('button').forEach((b) =>
+      b.addEventListener('click', () => {
+        unit = b.dataset.unit as 'cm' | 'in';
+        try { localStorage.setItem('unit', unit); } catch {}
+        paint();
+      }));
+
+    buy.addEventListener('click', async () => {
+      buy.disabled = true;
+      const label = buy.textContent;
+      buy.textContent = 'One moment…';
+      try {
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: buy.dataset.slug, size: SIZES[sizeIndex].code, frame }),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        const { clientSecret } = await res.json();
+        sessionStorage.setItem('cs', clientSecret);
+        navigate('/checkout');
+      } catch {
+        buy.textContent = 'Something went wrong. Try again.';
+        setTimeout(() => { buy.disabled = false; buy.textContent = label; }, 2600);
+      }
+    });
+
+    paint();
+    tilt();
+  }
+
+  // The print is held, not pinned. It tips a few degrees away from the cursor,
+  // the way a sheet tilts in the hand, and settles back when the cursor leaves.
+  // Lerped per frame so it never snaps; off entirely for reduced motion and touch.
+  function tilt() {
+    const shot  = document.getElementById('shot');
+    const mount = document.getElementById('mount');
+    if (!shot || !mount) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const MAX = 5;                       // degrees
+    let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
+    const step = () => {
+      cx += (tx - cx) * 0.12; cy += (ty - cy) * 0.12;
+      mount.style.transform = `rotateX(${cy.toFixed(3)}deg) rotateY(${cx.toFixed(3)}deg)`;
+      mount.style.setProperty('--lx', `${(50 - cx * 6).toFixed(1)}%`);
+      mount.style.setProperty('--ly', `${(50 + cy * 6).toFixed(1)}%`);
+      if (Math.abs(tx - cx) > 0.01 || Math.abs(ty - cy) > 0.01) raf = requestAnimationFrame(step);
+      else raf = 0;
+    };
+    const kick = () => { if (!raf) raf = requestAnimationFrame(step); };
+    shot.addEventListener('pointermove', (e) => {
+      const r = mount.getBoundingClientRect();
+      const nx = ((e.clientX - r.left) / r.width - 0.5) * 2;   // -1 … 1
+      const ny = ((e.clientY - r.top)  / r.height - 0.5) * 2;
+      tx = -Math.max(-1, Math.min(1, nx)) * MAX;               // cursor right → right edge tips away
+      ty =  Math.max(-1, Math.min(1, ny)) * MAX;               // cursor down  → bottom edge tips away
+      kick();
+    });
+    shot.addEventListener('pointerleave', () => { tx = 0; ty = 0; kick(); });
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>

@@ -23,9 +23,32 @@ async function getAccessToken(): Promise<string> {
   return data.access_token;
 }
 
+// The playlists that go on the page, in order. Names and covers come from
+// Spotify so a renamed or re-covered playlist updates itself. Name only, no copy.
+export const PLAYLISTS: string[] = [
+  '5nR2fKqVL7emTyEhGbBrHx',
+  '6xSDfIhVlhhM2NVl4YJ75t',
+  '2UCWNEhKV2fS4y8XSj6lPx',
+  '4aycs9OrU83g9bS9jkLXFU',
+];
+
 export const GET: APIRoute = async () => {
   try {
     const token = await getAccessToken();
+    const auth = { headers: { Authorization: `Bearer ${token}` } };
+
+    // Playlists in parallel with recently played; one failing must not blank the other.
+    const playlistsP = Promise.all(PLAYLISTS.map(async (id) => {
+      try {
+        const r = await fetch(`https://api.spotify.com/v1/playlists/${id}?fields=name,images,external_urls`, auth);
+        const p = await r.json();
+        return {
+          name: p.name as string,
+          cover: p.images?.[0]?.url as string | undefined,
+          spotifyUrl: (p.external_urls?.spotify as string) ?? `https://open.spotify.com/playlist/${id}`,
+        };
+      } catch { return null; }
+    }));
 
     const res = await fetch(
       'https://api.spotify.com/v1/me/player/recently-played?limit=10',
@@ -38,7 +61,7 @@ export const GET: APIRoute = async () => {
       title:      item.track.name,
       artist:     item.track.artists.map((a: any) => a.name).join(', '),
       album:      item.track.album.name,
-      albumArt:   item.track.album.images[1]?.url ?? item.track.album.images[0]?.url,
+      albumArt:   item.track.album.images[0]?.url ?? item.track.album.images[1]?.url, // 640px; the grid needs it
       spotifyUrl: item.track.external_urls.spotify,
       playedAt:   item.played_at,
     }));
@@ -52,11 +75,13 @@ export const GET: APIRoute = async () => {
       return true;
     });
 
-    return new Response(JSON.stringify({ tracks: unique }), {
+    const playlists = (await playlistsP).filter(Boolean);
+
+    return new Response(JSON.stringify({ tracks: unique, playlists }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=60', // cache 60s at edge
+        'Cache-Control': 'public, max-age=60, s-maxage=300', // 60s browser, 5 min edge
       },
     });
   } catch (err: any) {

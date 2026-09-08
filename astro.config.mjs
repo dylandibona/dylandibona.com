@@ -4,8 +4,9 @@ import vercel from '@astrojs/vercel';
 import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
 
-// https://astro.build/config
 export default defineConfig({
-  adapter: vercel(),
+  site: 'https://dylandibona.com',
+  adapter: vercel({ imageService: false }),
   integrations: [react(), keystatic()],
+  prefetch: { prefetchAll: true, defaultStrategy: 'viewport' },
 });

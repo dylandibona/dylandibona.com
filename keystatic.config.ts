@@ -2,30 +2,34 @@ import { config, collection, fields } from '@keystatic/core';
 
 export default config({
   storage: { kind: 'local' },
-  ui: {
-    brand: { name: 'dylandibona.com' },
-  },
+  ui: { brand: { name: 'dylandibona.com' } },
   collections: {
-    cocktails: collection({
-      label: 'Cocktails',
-      slugField: 'name',
-      path: 'src/content/cocktails/*',
+    prints: collection({
+      label: 'Prints',
+      slugField: 'title',
+      path: 'src/content/prints/*',
       format: { data: 'json' },
+      columns: ['title', 'where'],
       schema: {
-        name: fields.slug({ name: { label: 'Name' } }),
-        order: fields.integer({ label: 'Order', description: 'Lower numbers appear first. Leave blank to sort alphabetically.' }),
-        spirit: fields.text({ label: 'Spirit' }),
-        desc: fields.text({ label: 'Description', multiline: false }),
-        photo: fields.image({
-          label: 'Photo',
-          directory: 'public/cocktails',
-          publicPath: '/cocktails/',
+        title: fields.slug({
+          name: { label: 'Title' },
+          slug: { description: 'The slug is the URL and must match the image filename in src/assets/prints.' },
         }),
-        ingredients: fields.array(
-          fields.text({ label: 'Ingredient' }),
-          { label: 'Ingredients', itemLabel: props => props.value }
-        ),
-        method: fields.text({ label: 'Method', multiline: true }),
+        where: fields.text({ label: 'Where', description: 'Shown under the title. Leave blank if unsure — blank prints nothing.' }),
+        orientation: fields.select({
+          label: 'Orientation',
+          options: [
+            { label: 'Landscape', value: 'landscape' },
+            { label: 'Portrait', value: 'portrait' },
+          ],
+          defaultValue: 'landscape',
+        }),
+        published: fields.checkbox({ label: 'For sale', defaultValue: true }),
+        hero: fields.checkbox({
+          label: 'Can fill the homepage',
+          description: 'Landscape only. Portraits crop badly full-bleed.',
+          defaultValue: false,
+        }),
       },
     }),
   },

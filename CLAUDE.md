@@ -1,194 +1,226 @@
 # dylandibona.com — Development Notes
 
-This file captures architectural decisions, known gotchas, and patterns for working on this codebase. Keep it up to date.
-
 ---
 
 ## Stack
 
 | Layer | Technology |
 |---|---|
-| Framework | Astro 6.x (static + hybrid SSR via Vercel adapter) |
-| Adapter | `@astrojs/vercel` |
-| CMS | Keystatic (`@keystatic/core` + `@keystatic/astro`) |
-| UI | React 19 (required peer dep for Keystatic) |
-| Hosting | Vercel (dylandibona.com) |
-| Styles | Global CSS (`src/styles/global.css`) — no utility framework |
+| Framework | Astro 6.x, Vercel adapter |
+| CMS | Keystatic (`storage: local`, dev only) |
+| UI | React 19 (peer dep for Keystatic only — no React components ship) |
+| Type | Area, from Adobe Fonts kit `yfz0paf` |
+| Styles | One stylesheet, `src/styles/site.css` |
 
 ---
 
-## Project Structure
+## The shape of the site
 
-```
-src/
-  components/cards/    # One .astro component per homepage panel
-  content/cocktails/   # Keystatic-managed JSON data files
-  data/site.json       # Static data: places, playlists, copy, etc.
-  pages/
-    index.astro        # Main homepage — assembles all card components
-    api/spotify.ts     # Serverless endpoint for live Spotify tracks
-  styles/global.css    # All styles (single file, sectioned)
-public/
-  cocktails/           # Cocktail photos (Keystatic saves here)
-  prints/              # Photography print images
-  prints-lifestyle/    # Lifestyle/editorial photos for Photography panel bg
-  places-to-stay/      # Images for Places to Stay panel
-keystatic.config.ts    # CMS schema definition
+One photograph fills the viewport. Everything else is an index in the bottom left.
+Opening a section never takes the photograph off screen: `ClientRouter` swaps the
+document while `transition:persist` keeps `.stage`, `.track` and the loader alive.
+Real URLs throughout, because a print needs an address someone can type off a wall.
+
+`body[data-open]` drives every open/closed state in CSS. Home sets `false`, every
+other route sets `true` via the layout's `open` prop. There is no JS toggling classes.
+
+### Layout props
+```astro
+<Site title="…" description="…" open />
 ```
 
 ---
 
-## Keystatic CMS
+## The stage (8 Sep 2026)
 
-### Setup
-- Installed with `--legacy-peer-deps` due to peer dep conflict between `@keystatic/astro` and Astro 6
-- `.npmrc` contains `legacy-peer-deps=true` — **do not remove**, Vercel needs this to install
-- Routes are auto-injected by the integration: `/keystatic/[...params]` and `/api/keystatic/[...params]`
-- No manual page files needed for the CMS UI
+The homepage photograph is a WebGL canvas in `.stage`, not an `<img>`. One fragment
+shader does two things. The water: two slow layers of simplex noise bend the texture
+lookup by a few thousandths, and a broader, slower swell magnifies by about a percent as
+it passes, so the print looks like it sits under a still sheet of water. The arrival: a new
+photograph comes in as 96px blocks that shrink to sharp (2.2s, eased, log spaced); the
+current one breaks back into blocks (0.55s) before the next. The water only runs on the
+homepage; behind the veil the frame loop stops. No WebGL → plain 2D draw, no flow.
+Reduced motion → sharp at once, no flow. Dials: `MAX`, `IN`, `OUT` in the `pix` module;
+in the shader, `.0035` is bend amplitude, `.012` is swell magnification, the `t *` factors
+are speed.
 
-### Cocktails Collection
-- Schema: `name` (slug field), `order` (integer), `spirit`, `desc`, `photo` (image), `ingredients` (array), `method`
-- Files stored at: `src/content/cocktails/*.json`
-- Photos stored at: `public/cocktails/[slug]/photo.jpg`
+## Prints
 
-### Image Path Gotcha
-Keystatic `fields.image` with `publicPath: '/cocktails/'` stores the **full public path** in JSON (e.g. `/cocktails/negroni/photo.jpg`). Manually created JSON files may store only the filename (e.g. `negroni.jpg`). The mapping in `index.astro` handles both:
-```ts
-photo: mod.photo
-  ? (mod.photo.startsWith('/') ? mod.photo : `/cocktails/${mod.photo}`)
-  : null
-```
-Never prepend `/cocktails/` unconditionally — you'll double-prefix Keystatic-managed images.
+**One image plus one JSON file makes a print.** Both are keyed by slug:
 
-### Reading Cocktail Data
-Use `import.meta.glob` rather than the Keystatic Reader API. The Reader API's TypeScript gymnastics with `fields.slug` (returns display name, not slug) make it painful. The glob approach is simpler and works at build time:
-```ts
-const cocktailMods = import.meta.glob('../content/cocktails/*.json', { eager: true });
-```
+- `src/assets/prints/<slug>.jpg` — the photograph, 2500px on the long edge, with the
+  printed white border baked in (53px). The border is intentional and should show
+  inside the frame. Do not crop it, and do not draw a second one in CSS.
+- `src/content/prints/<slug>.json` — title, where, orientation, published, hero
 
-### Cocktail Ordering
-The `order` field is an optional integer. Sort logic in `index.astro`:
-- Items with `order` set → sorted ascending by number
-- Items without `order` → appended alphabetically after ordered items
+`src/lib/prints.ts` joins them with `import.meta.glob` and **throws at build time**
+if a JSON file has no matching image. A missing pair fails the build rather than
+shipping a hole.
 
-### Deleting a Cocktail in Keystatic
-Open the cocktail in `/keystatic`, scroll to the bottom of the edit view. There is a **Delete entry** button. No code changes needed.
+- `published: false` hides a print everywhere.
+- `hero: true` lets a photograph fill the homepage. **Landscape only** — portraits
+  crop badly full-bleed.
+- `where: ""` renders nothing. Leave it blank rather than guessing.
+
+Prices live in `SIZES` in `src/lib/prints.ts`, in pence. **They are invented** and
+must be replaced with real CreativeHub cost plus margin before launch.
 
 ---
 
-## Homepage Grid
+## Gotchas that cost real time
 
-### Layout
-8 cards arranged in a 4-column CSS grid (`.card-area`). Grid positions are set per card.
+### The loader must be taken out of the layout, not just faded
+It is `transition:persist`, but a route entered directly still ships its own copy of
+the markup. Without the `window.__booted` guard adding `.gone` (`display:none`), that
+fresh copy sits there as an opaque black sheet swallowing every click on the page.
 
-### Critical: Use `data-card-index` Selectors
-**Never use `nth-child` for grid positioning.** Keystatic injects extra DOM elements (route scripts, portals) that can shift sibling counts and break `nth-child` selectors. Use the `data-card-index` attribute instead:
-```css
-/* WRONG — fragile */
-.card:nth-child(1) { grid-column: 1; grid-row: 1 / 7; }
+### The hero controller is a singleton on `window.__hero`
+Because the stage is persisted, re-running the initialiser on each navigation would
+stack rotation timers. It builds once and exposes `sync()`, called on `astro:after-swap`.
 
-/* RIGHT — stable */
-.card[data-card-index="0"] { grid-column: 1; grid-row: 1 / 7; }
-```
-Each card component has `data-card-index="N"` set on its root `<div class="card">`.
+### Adobe Fonts is loaded non-blocking, on purpose
+A render-blocking stylesheet also blocks the inline scripts under it. If Adobe is slow,
+a plain `<link rel=stylesheet>` leaves the loader unable to paint — a black screen for
+as long as the request hangs. It is loaded with `rel=preload` + `onload`, with a
+`<noscript>` fallback. Expect a brief FOUT. That is the correct trade.
 
-### Card Index Map
-| Index | Panel |
+### Adobe Fonts has no domain list
+Web projects are not domain-restricted. `localhost`, Vercel previews and production all
+work from the one kit. If Area is not rendering, it is not a domain problem.
+
+### A hero that 404s must hand off, and the loader must self-clear
+Both guards are load-bearing. Without them one missing file leaves the site a permanent
+black screen. There is a hard 6-second clear regardless of what else happens.
+
+### `astro preview` does not serve with the Vercel adapter
+Use `npm run dev`, or deploy.
+
+### `.npmrc` is required
+`legacy-peer-deps=true` — Vercel's install fails without it on the Keystatic/Astro 6
+peer dep conflict. Do not remove.
+
+---
+
+## Typography
+
+Kit `yfz0paf`. `--sans` = `ferryman` (300 and 700, both with italics), used for
+everything. `--name` = `gandur-new` (300 only), used for the name top left and nothing
+else. `--disp` aliases `--sans`. Area is still in the kit but unused (swapped 8 Sep 2026).
+
+**Navigation is never set in capitals.** Sentence case, weight 300. Capitals are for
+small tracked labels only: eyebrows, size rows, print locations, fine print, the loader.
+The contact block is data rather than a label, so it is lowercase too.
+
+Ferryman has no 400. Body, nav and headings all run at 300; 700 is for emphasis only.
+`font-synthesis:none` is set — never let a browser fake a weight or an italic.
+
+---
+
+## API routes
+
+| Route | What |
 |---|---|
-| 0 | Photography |
-| 1 | Listening |
-| 2 | Cocktails |
-| 3 | Natrx / Video |
-| 4 | Places to Stay |
-| 5 | Moodboard |
-| 6 | Writing |
-| 7 | (eighth panel) |
+| `/api/spotify` | Recently played, refresh-token flow, cached 60s at the edge |
+| `/api/health` | Liveness check |
+
+Spotify needs `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`
+in Vercel. Locally it returns 500 without them; `/listening` degrades to a message
+rather than an empty list.
 
 ---
 
-## Photography Card
+## Checkout and fulfilment (not built yet)
 
-### Full-Bleed Background
-The Photography card uses a random lifestyle image from `public/prints-lifestyle/` as its background. Selection happens at build time via `Math.random()` in the component frontmatter.
+Decided 8 Sep 2026. Two halves, built so the second can land without touching the first.
 
-- Images are hardcoded by filename in `Photography.astro` — update the array when adding/removing images from `public/prints-lifestyle/`
-- Do **not** use `import.meta.glob` on `public/` — those files aren't processed by Vite and the glob won't work reliably
+**Half one, Stripe.** Hosted Stripe Checkout, not Elements. Checkout collects card and
+shipping address; the site never handles either. A Vercel function creates the session
+with `slug`, `size` and `frame` in metadata and the shipping address collection turned
+on for the countries we ship to. A `checkout.session.completed` webhook calls
+`fulfil(order)` in `src/lib/fulfil.ts`. The fulfil call is keyed on the session id so a
+Stripe webhook retry can never place two orders.
 
-### Dark Overlay
-A `.photo-card-overlay` div (`position: absolute; inset: 0; background: rgba(0,0,0,0.48)`) sits at `z-index: 1` between the background image and the card content (`z-index: 2+`). This ensures text legibility.
+**Half two, `fulfil.ts`.** One adapter with two implementations:
 
-### card-bg is Not Used for Photography
-The generic `.card-bg` class is designed to be nearly invisible (opacity 0 → 0.1 on active). For Photography's full-bleed effect, the background image is set inline directly on the `.card` element, not on a `.card-bg` child.
+- `manual` (ships first): emails Dylan the full order — print, size, frame, address,
+  session id — and he places it by hand on creativehub. This is the fallback forever,
+  not just the interim: if the API call fails for any reason, fall through to it.
+- `creativehub` (once API access is enabled): quote, then order, per the spec below.
 
----
+**Order status page** at a real URL so any email is one link. Reads from wherever
+orders are stored (see below).
 
-## Places to Stay Card
+**Orders need a table.** Session id, slug, size, frame, address, Stripe amount,
+creativehub order id, creativehub quoted cost, status, timestamps. Free tier only:
+Supabase or Vercel Postgres. Decide at build time.
 
-### Layout
-Full-bleed image panel with grow/shrink hover navigation:
-- `.places-expand` has `padding: 0 !important` to eliminate the card's default padding
-- `.places-duo` is `position: absolute; inset: 0` — fills the entire expanded card
-- Individual place images (`.pd-img`) use `flex: 1` and `transition: flex` — hovering expands one while shrinking the other
-- Floating title (`.places-title`) is `position: absolute; top: 28px; left: 28px; z-index: 5`
-
-### Data Shape (site.json)
-```json
-{
-  "city": "San Francisco",
-  "name": "Apartment name",
-  "neighborhood": "The Mission",
-  "sleeps": 2,
-  "image": "/places-to-stay/san-francisco.jpg",
-  "bookUrl": "https://...",
-  "bookLabel": "Book on Airbnb"
-}
-```
+**Tracking email.** No creativehub webhook exists yet, so a daily Vercel cron polls
+open orders via `GET /v1/orders/{id}` and emails when an item reaches dispatched.
 
 ---
 
-## Spotify Integration
+## creativehub API (theprintspace)
 
-Live recently-played tracks via serverless endpoint at `/api/spotify.ts`:
-- Credentials stored as Vercel environment variables: `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`
-- Endpoint fetches using the refresh token flow, returns JSON array of tracks
-- Response cached at edge for 60 seconds
-- Frontend (`grid.js`) fetches on first Listening panel open, replaces static fallback
+Reference: https://sell.creativehub.io/api-docs. It is a React page; the spec is
+inlined in the JS bundle, not fetchable as text. Support: support@theprintspace.co.uk.
+
+**Everything older in these notes about `Authorization: ApiKey`, embryonic and
+confirmed orders, PascalCase fields, or a sandbox at `api.sandbox.tps-test.io` is the
+legacy API and is dead. Do not build against it.** Any doc that shows snake_case
+`shipping_address` / `print_size: "A3"` / `paper_type` strings is invented. Ignore it.
+
+- Base URL `https://escher-v2.creativehub.io/v1`.
+- Auth `Authorization: Bearer <token>`. Tokens at sell.creativehub.io → Settings → API
+  access. Shown once. API access is enabled per account by support (403 = not enabled).
+  Account needs a saved card and a country of residence; API orders bill to the card on
+  the merchant rollup.
+- Rate limits 120 reads/min, 30 writes/min. Errors are `{"detail": "reason"}`.
+- No sandbox. No webhooks yet (`webhook_uri` on a token is accepted, delivery "coming").
+- Papers: `photo-rag` (Hahnemühle Photo Rag) is the default and the one we use.
+
+### Catalogue model
+upload → drop → product → variants. One-time sync script, not per order.
+
+1. `POST /uploads/ref {url, image_type:"artwork", name}`. `url` must be a public https
+   URL; it is fetched once. **Use the full-resolution master, not the 2500px web file**:
+   the print file is composed from this upload at order time.
+2. `POST /drops {title}`. One drop for the whole shop is fine.
+3. `POST /drops/{drop_id}/products {upload_id, title, edition_size, is_limited_edition,
+   coa_type}`. Defaults are limited edition of 50; set explicitly.
+4. `PUT /drops/{drop_id}/products/{product_id}/variants {variants:[…]}`. PUT replaces the
+   whole list every time. Each variant: `size_label`, `print_width_mm`,
+   `print_height_mm`, `price_gbp` (required, irrelevant for API orders), `is_framed`,
+   `frame_color: oak|black|white`, `mount_board_size: none|small|large`,
+   `border: none|small|large` (default small), `paper_id`, `signature`, `numbering`.
+   Same size+frame identity twice → 422 `duplicate_variants`.
+5. There is no variants listing endpoint. Read variant ids from `GET /drops/{drop_id}`
+   (the `data` blob). The sync script writes `variant_id` per size and frame back into
+   `src/content/prints/<slug>.json`. That id is the SKU.
+
+Open question for support: whether an API-only account must `POST /drops/{id}/publish`
+before variants are orderable. Publish "creates the store products" and we have no
+connected store.
+
+### Ordering
+- `POST /orders/quote {items:[{variant_id, quantity}], delivery_country_code}` →
+  `{currency, total_incl_vat, total_excl_vat, total_vat, production_cost,
+  delivery_cost, addon_cost, ddp_total}`. Always quote first and store it against the
+  order so margin against `pricing.ts` is visible.
+- `POST /orders {items, delivery_name, delivery_line1, delivery_line2?, delivery_city,
+  delivery_postcode, delivery_country_code, delivery_email?, delivery_phone?,
+  delivery_county?}` with an `Idempotency-Key` header (use the Stripe session id) →
+  201 `{order_id, order_number, currency, total_incl_vat, lines}`.
+- `GET /orders`, `GET /orders/{order_id}` (items with per-item production status),
+  `GET /invoices`.
+
+### Before committing to prices
+Quote the large framed to a US address. `pricing.ts` was set for how the numbers read,
+not from cost. The quote says whether $595 covers London to New Orleans on a framed
+70×100.
 
 ---
 
-## Deployment
+## Also not built yet
 
-### Vercel Project
-- Team: Dylan's projects (`team_AWaPx3Ss5neLYFXWNSbfOmnC`)
-- Project: `prj_aEgZeaBMw2JhH9xqFf2OP4ktYo8i`
-- Git integration: auto-deploys on push to `main`
-
-### CLI Auth Mismatch
-The local Vercel CLI (`vercel whoami`) is scoped to **monday-and-partners**, not Dylan's projects. CLI commands like `vercel logs` will fail. Use the Vercel MCP tools or the Vercel dashboard instead for deployment inspection.
-
-### .npmrc Is Required
-`legacy-peer-deps=true` in `.npmrc` is required for Vercel's build to succeed. Without it, `npm install` fails on the `@keystatic/astro` / Astro 6 peer dep conflict.
-
----
-
-## CSS Conventions
-
-- All styles in `src/styles/global.css`, sectioned with `/* ══ SECTION ══ */` headers
-- CSS custom properties defined at `:root` (colors, spacing)
-- Card hover/active state transitions are `0.2–0.6s ease`
-- Identity bar has `box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.55)` for depth above the grid
-
----
-
-## Content Editing Cheatsheet
-
-| What | Where |
-|---|---|
-| Cocktail recipes | `/keystatic` → Cocktails collection |
-| Cocktail order | Set the `Order` integer field (lower = first; blank = alphabetical) |
-| Delete a cocktail | Open in Keystatic → scroll to bottom → Delete entry |
-| Places to Stay | `src/data/site.json` → `places` array |
-| Moodboard images | Tumblr feed (fetched at build time via `TUMBLR_API_KEY`) |
-| Photography prints | `src/data/site.json` → `prints` array + image in `public/prints/` |
-| Photography panel bg | Add image to `public/prints-lifestyle/` + add filename to array in `Photography.astro` |
-| Playlists | `src/data/site.json` → `playlists` array |
+- **The Letter.** Beehiiv does not exist yet. The form says so rather than pretending.
+  Issue rows link nowhere.

@@ -1,0 +1,83 @@
+---
+export const prerender = false;
+
+import { Image } from 'astro:assets';
+import Site from '../../../layouts/Site.astro';
+import { findPrint } from '../../../lib/prints';
+import { SIZES, FRAMES, DEFAULT_SIZE, DEFAULT_FRAME, priceOf, money,
+         type FrameCode } from '../../../lib/pricing';
+
+/**
+ * The payment step. A real URL, not a modal, for one practical reason: if a
+ * phone rings mid-payment, or someone refreshes, they come back to the payment
+ * step rather than the homepage. Visually it is a sheet over the photograph —
+ * verification and payment on one surface, because a separate "are you sure?"
+ * adds friction without adding information.
+ */
+const { slug } = Astro.params;
+const print = slug ? findPrint(slug) : undefined;
+if (!print) return Astro.redirect('/prints', 302);
+
+const q = Astro.url.searchParams;
+const size = SIZES.find((s) => s.code === q.get('size')) ?? SIZES[DEFAULT_SIZE];
+const frame = FRAMES.find((f) => f.code === q.get('frame')) ?? FRAMES.find((f) => f.code === DEFAULT_FRAME)!;
+const amount = priceOf(size, frame.code as FrameCode);
+const pk = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY ?? '';
+const backHref = `/prints/${print.slug}`;
+---
+<Site
+  title={`Checkout — ${print.title}`}
+  description="Checkout"
+  crumbs={[{ label: 'Prints', href: '/prints' }, { label: print.title, href: backHref }, { label: 'Checkout' }]}
+  image={print.image}
+  open
+>
+  <div class="pay">
+    <div class="pay-item">
+      <div class="mount mount-sm" data-frame={frame.code}>
+        <span class="rail rail-t"></span><span class="rail rail-r"></span>
+        <span class="rail rail-b"></span><span class="rail rail-l"></span>
+        <Image src={print.image} alt={print.title} widths={[280, 560]} sizes="180px" quality={78} />
+      </div>
+      <div class="pay-meta">
+        <h2>{print.title}</h2>
+        <div class="pay-spec">
+          {size.cm} cm · {size.inches} in<br />
+          {frame.code === 'none' ? 'Unframed, ships rolled' : `Framed in ${frame.label.toLowerCase()}`}
+        </div>
+        <a class="pay-change" href={backHref}>Change size or frame</a>
+      </div>
+      <div class="pay-amt">{money(amount)}</div>
+    </div>
+
+    <div class="pay-form">
+      <div id="express"></div>
+      <div id="payment"></div>
+      <button class="buy-btn" id="pay" disabled>Pay {money(amount)}</button>
+      <div class="fine" id="payNote">Loading payment…</div>
+    </div>
+  </div>
+</Site>
+
+<script define:vars={{ pk, slug: print.slug, sizeCode: size.code, frameCode: frame.code }}>
+  (async () => {
+    const note = document.getElementById('payNote');
+    if (!pk) {
+      note.textContent = 'Payments are not switched on yet — PUBLIC_STRIPE_PUBLISHABLE_KEY is missing.';
+      return;
+    }
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, size: sizeCode, frame: frameCode }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const { clientSecret } = await res.json();
+      window.__pay = { pk, clientSecret };
+      note.textContent = 'Payment form loads here once Stripe.js is wired.';
+    } catch (e) {
+      note.textContent = 'Could not start checkout. Nothing has been charged.';
+    }
+  })();
+</script>

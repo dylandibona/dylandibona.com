@@ -1,0 +1,19 @@
+---
+import { Image } from 'astro:assets';
+import Site from '../../layouts/Site.astro';
+import { PRINTS } from '../../lib/prints';
+---
+<Site title="Prints — Dylan James DiBona" description="Every photograph is made to order, printed in London, shipped anywhere. Three sizes." crumbs={[{ label: "Prints" }]} open>
+  <div class="eyebrow">Prints</div>
+  <p class="lede">Every photograph is made to order, printed in London, shipped anywhere. Three sizes.</p>
+  <div class="grid">
+    {PRINTS.map((p) => (
+      <a class="tile" href={`/prints/${p.slug}`}>
+        <figure>
+          <Image src={p.image} alt={p.title} widths={[320, 640]} sizes="(max-width:720px) 45vw, 260px" quality={78} />
+        </figure>
+        <figcaption><span>{p.title}</span><em>{p.where}</em></figcaption>
+      </a>
+    ))}
+  </div>
+</Site>
