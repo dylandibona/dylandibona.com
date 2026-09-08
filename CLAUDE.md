@@ -122,6 +122,14 @@ Ferryman has no 400. Body, nav and headings all run at 300; 700 is for emphasis 
 |---|---|
 | `/api/spotify` | Recently played, refresh-token flow, cached 60s at the edge |
 | `/api/health` | Liveness check |
+| `/api/checkout` | POST {slug,size,frame} → hosted Checkout Session url. Price recomputed server-side |
+| `/api/stripe/webhook` | checkout.session.completed → fulfil (manual email to Dylan), receipt to buyer, Beehiiv subscribe on consent. Idempotent via `fulfilled_at` on the PaymentIntent |
+| `/orders/[session]` | The receipt. Reads the session from Stripe; unpaid or unknown → /prints |
+
+Stripe needs `STRIPE_SECRET_KEY`, `PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`,
+`SITE_URL`. Email needs `RESEND_API_KEY` (sending from `orders@send.dylandibona.com`) and
+`ORDER_NOTIFY_EMAIL`. Newsletter needs `BEEHIIV_API_KEY`, `BEEHIIV_PUBLICATION_ID`; absent,
+subscribe is a logged no-op. Local webhooks: `stripe listen --forward-to localhost:4321/api/stripe/webhook`.
 
 Spotify needs `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`
 in Vercel. Locally it returns 500 without them; `/listening` degrades to a message
