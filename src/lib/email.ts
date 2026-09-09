@@ -106,7 +106,7 @@ Dylan`;
   ${printBlock(o)}
   <tr><td>${label('Shipping to')}${lines(addressLines(o))}</td></tr>
   <tr><td>
-    ${p('Each print is made when it is ordered, by hand in London on Hahnemühle Photo Rag. Allow up to 10 days depending on your address. You'll get a note when it ships.')}
+    ${p('Each print is made when it is ordered, by hand in London on Hahnemühle Photo Rag. Allow up to 10 days depending on your address. You\u2019ll get a note when it ships.')}
     ${p(`Your order is at <a href="${o.receiptUrl}" style="color:#F2F0EC;text-decoration:underline;text-decoration-color:rgba(242,240,236,.35)">dylandibona.com/orders/${esc(o.ref)}</a>.`)}
     ${p('If anything about this is wrong, or you just want to say hello, reply to this email. It comes to me.')}
     ${p('Dylan', 'margin-top:1.6em;color:rgba(242,240,236,.6)')}
