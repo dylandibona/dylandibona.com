@@ -89,6 +89,19 @@ let drop = drops.find((d) => d.title === 'dylandibona.com');
 if (!drop) { drop = await ch('/drops', { method: 'POST', body: JSON.stringify({ title: 'dylandibona.com', create_early_access_page: false }) }); console.log('created drop', drop.id); }
 else console.log('drop', drop.id);
 
+// ── the letter insert: one image, every product ──
+// Registered once (id cached in scripts/creativehub-insert.json), then set as
+// print_insert_id on each product. Re-registering is harmless but litters the
+// media library, so the cache matters.
+const INSERT_URL = `${MASTERS.replace(/\/masters\/jpg$/, '')}/inserts/letter-insert.png`;
+const insertCache = 'scripts/creativehub-insert.json';
+let insertId = fs.existsSync(insertCache) ? JSON.parse(fs.readFileSync(insertCache, 'utf8')).id : null;
+if (!insertId && !args.includes('--no-insert')) {
+  const u = await ch('/uploads/ref', { method: 'POST', body: JSON.stringify({ url: INSERT_URL, image_type: 'letter_insert', name: 'Letter insert' }) });
+  insertId = u.id; fs.writeFileSync(insertCache, JSON.stringify({ id: insertId, url: INSERT_URL }, null, 2) + '\n');
+  console.log('registered letter insert', insertId);
+}
+
 const save = (p, st) => { const j = JSON.parse(fs.readFileSync(p.file, 'utf8')); j.creativehub = st; fs.writeFileSync(p.file, JSON.stringify(j, null, 2) + '\n'); };
 for (const p of prints) {
   const st = p.creativehub ?? {};
@@ -97,8 +110,17 @@ for (const p of prints) {
     st.upload_id = u.id; console.log(p.slug, 'upload', u.id); save(p, st);
   }
   if (!st.product_id) {
-    const pr = await ch(`/drops/${drop.id}/products`, { method: 'POST', body: JSON.stringify({ upload_id: st.upload_id, title: p.title, description: p.where ?? '', is_limited_edition: false, coa_type: 0 }) });
+    const pr = await ch(`/drops/${drop.id}/products`, { method: 'POST', body: JSON.stringify({ upload_id: st.upload_id, title: p.title, description: p.where ?? '', is_limited_edition: false, coa_type: 0, ...(insertId ? { print_insert_id: insertId } : {}) }) });
     st.product_id = pr.id; st.drop_id = drop.id; console.log(p.slug, 'product', pr.id); save(p, st);
+  }
+  if (insertId && st.insert_id !== insertId) {
+    let ok = false;
+    for (const method of ['PATCH', 'PUT']) {
+      try { await ch(`/drops/${drop.id}/products/${st.product_id}`, { method, body: JSON.stringify({ print_insert_id: insertId }) }, 1); ok = true; break; }
+      catch (e) { if (!/404|405/.test(e.message)) console.warn('  insert attach', method, e.message.slice(0, 120)); }
+    }
+    if (ok) { st.insert_id = insertId; save(p, st); console.log(p.slug, 'insert attached'); }
+    else console.warn(p.slug, 'could not attach insert to existing product (no update endpoint); set via UI or recreate');
   }
   if (args.includes('--no-variants')) continue;
   const res = await ch(`/drops/${drop.id}/products/${st.product_id}/variants`, { method: 'PUT', body: JSON.stringify({ variants: variantsFor(p) }) });
