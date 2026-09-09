@@ -26,6 +26,8 @@ export type Size = {
   /** dimensions only, no unit — the UI appends it */
   cm: string;
   inches: string;
+  /** short side, long side, in mm; the catalogue sync swaps for landscape */
+  mm: [number, number];
   framed: number;   // cents, same price in all three frame colours
   print: number;    // cents, unframed
 };
@@ -36,9 +38,11 @@ export type Size = {
 // The framing premium came down most; $280 → $760 on the large was a store markup.
 // PROVISIONAL until theprintspace confirm actual cost per size.
 export const SIZES: Size[] = [
-  { code: 'S', cm: '30 × 42',  inches: '12 × 17', framed: 15000, print:  6500 },
-  { code: 'M', cm: '42 × 59',  inches: '17 × 23', framed: 21500, print: 10500 },
-  { code: 'L', cm: '70 × 100', inches: '28 × 39', framed: 59500, print: 25000 },
+  // These are creativehub's stocked frame sizes (A3, A2, 70×100). Frames exist only
+  // in these, so the sheet sizes match exactly; mm in the catalogue sync must agree.
+  { code: 'S', cm: '29.7 × 42',  inches: '11.7 × 16.5', mm: [297, 420],   framed: 15000, print:  6500 },
+  { code: 'M', cm: '42 × 59.4',  inches: '16.5 × 23.4', mm: [420, 594],   framed: 21500, print: 10500 },
+  { code: 'L', cm: '70 × 100',   inches: '27.6 × 39.4', mm: [700, 1000],  framed: 59500, print: 25000 },
 ];
 export const DEFAULT_SIZE = 1; // the middle one
 
