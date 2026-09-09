@@ -3,5 +3,39 @@
   "where": "New Orleans",
   "orientation": "landscape",
   "published": true,
-  "hero": true
+  "hero": true,
+  "creativehub": {
+    "upload_id": "cc03088b-8492-49d2-969a-4659c9853a7c",
+    "product_id": "2566ef99-1d2b-45a7-bd9d-9972a05cd34d",
+    "drop_id": "6f585ef7-33b8-41a4-82a6-c504c0381b07",
+    "variants": {
+      "S|none": "dbf66015-8ce0-4fd1-a490-df0b82bed900",
+      "S|black": "0cc584b0-092e-4806-b4b5-896e0f246183",
+      "S|white": "b81885af-8694-4ee8-95f1-e606bae69c27",
+      "S|oak": "78d97b05-6f6f-4fe7-b37d-a027684d1053",
+      "M|none": "d4a1ef2a-f7d3-4b48-a4f9-fc8629a05955",
+      "M|black": "b7cea032-9278-41b6-afeb-da91163d8dfb",
+      "M|white": "0100daf5-6f96-4fb4-9d6a-301635879b3e",
+      "M|oak": "579ab472-0c9a-4dc1-9875-cadd4db9c1e0",
+      "L|none": "2b142dbe-aa2e-449e-9896-1d951f7eb1ef",
+      "L|black": "d3c9f7ee-16a0-47b1-a968-797795baba06",
+      "L|white": "4dd5db7f-4529-4946-bc2b-20b7e995ee53",
+      "L|oak": "1211e436-17a1-43ed-96b7-6369d072f70a"
+    },
+    "skus": {
+      "S|none": "V-5SUU0BG9",
+      "S|black": "V-NDQXOV9H",
+      "S|white": "V-OSP0XLHT",
+      "S|oak": "V-3KD87XJD",
+      "M|none": "V-4A4B2173",
+      "M|black": "V-D7O583SL",
+      "M|white": "V-NPS7S5YU",
+      "M|oak": "V-NUFS9OR3",
+      "L|none": "V-ULQ65AS1",
+      "L|black": "V-RY8H9P17",
+      "L|white": "V-KGVJEHRR",
+      "L|oak": "V-IWNBTUPR"
+    },
+    "cost": {}
+  }
 }

@@ -45,7 +45,10 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (pi?.id) {
     await S.paymentIntents.update(pi.id, {
-      metadata: { ...pi.metadata, fulfilled_at: new Date().toISOString(), fulfilled_via: result.via },
+      metadata: {
+        ...pi.metadata, fulfilled_at: new Date().toISOString(), fulfilled_via: result.via,
+        ...(result.chOrderId ? { creativehub_order_id: result.chOrderId, creativehub_order_number: result.chOrderNumber ?? '', creativehub_cost: String(result.chCost ?? '') } : {}),
+      },
     }).catch((e) => console.warn('stamp', e?.message));
   }
 

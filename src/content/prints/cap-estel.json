@@ -3,5 +3,39 @@
   "where": "Éze, France",
   "orientation": "landscape",
   "published": true,
-  "hero": true
+  "hero": true,
+  "creativehub": {
+    "upload_id": "868808d3-22cf-4727-a558-1b651f95960e",
+    "product_id": "64ecff4e-1506-4777-9bc6-72517e9f64b2",
+    "drop_id": "6f585ef7-33b8-41a4-82a6-c504c0381b07",
+    "variants": {
+      "S|none": "32adb168-433c-4d3b-b374-f452d111297f",
+      "S|black": "511d866d-82d6-4ec8-b8da-86aac17f8d62",
+      "S|white": "af9b8453-60ef-4eb9-b676-9e05364ae993",
+      "S|oak": "87e58353-2a92-48ef-bac8-b4cf14cf0392",
+      "M|none": "7f282883-5ad1-40c1-b838-9570dde9e3a0",
+      "M|black": "914f1785-880e-48aa-b85b-9073aa342e81",
+      "M|white": "d589a88d-9f7c-4733-96f0-71c5bdc261e2",
+      "M|oak": "7fa44bc2-25e1-40f6-b17b-c7347cec85d2",
+      "L|none": "41651b7f-c622-4a04-98e3-72e86817fa84",
+      "L|black": "81aefa2e-de5c-4ad4-aec6-bc840470f3dd",
+      "L|white": "0981dbd6-5353-484d-97a2-2536a0e20837",
+      "L|oak": "a6ffeee9-903b-4d53-ab6c-6c70dad27d38"
+    },
+    "skus": {
+      "S|none": "V-JDHH3AD1",
+      "S|black": "V-9YRF4TWJ",
+      "S|white": "V-L4SA15JL",
+      "S|oak": "V-LP4NDE0H",
+      "M|none": "V-LTEGILJG",
+      "M|black": "V-USMP3OF6",
+      "M|white": "V-HT2HIX2A",
+      "M|oak": "V-I37U66Q8",
+      "L|none": "V-6OQZC999",
+      "L|black": "V-XAU7YXBB",
+      "L|white": "V-ZOH5WIY5",
+      "L|oak": "V-DHXE3W3T"
+    },
+    "cost": {}
+  }
 }

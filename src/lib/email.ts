@@ -146,9 +146,9 @@ Receipt: ${o.receiptUrl}`;
   ${printBlock(o)}
   <tr><td>${label('Ship to')}${lines([...addressLines(o), o.phone, o.email].filter(Boolean))}</td></tr>
   <tr><td>${label('Newsletter')}${lines([o.optIn ? 'Opted in' : 'Opted out'])}</td></tr>
-  <tr><td>${label('Do')}
+  <tr><td>${label(note.startsWith('Placed') ? 'Placed' : 'Do')}
     <p style="margin:0 0 1.6em;font-size:15px;line-height:1.9">
-      <a href="${ch}" style="color:#F2F0EC;text-decoration:underline;text-decoration-color:rgba(242,240,236,.35)">Place it on creativehub</a><br>
+      <a href="${ch}" style="color:#F2F0EC;text-decoration:underline;text-decoration-color:rgba(242,240,236,.35)">${note.startsWith('Placed') ? 'Check it on creativehub' : 'Place it on creativehub'}</a><br>
       <a href="${stripeUrl}" style="color:rgba(242,240,236,.7);text-decoration:none">Payment in Stripe</a><br>
       <a href="${o.receiptUrl}" style="color:rgba(242,240,236,.7);text-decoration:none">Receipt page</a>
     </p>

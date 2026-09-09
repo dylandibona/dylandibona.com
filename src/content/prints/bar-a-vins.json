@@ -3,5 +3,39 @@
   "where": "London",
   "orientation": "portrait",
   "published": true,
-  "hero": true
+  "hero": true,
+  "creativehub": {
+    "upload_id": "4832f944-959f-4885-8ead-1aac525fd13f",
+    "product_id": "a1120708-68bb-40be-8ac3-d1465a94bbaf",
+    "drop_id": "6f585ef7-33b8-41a4-82a6-c504c0381b07",
+    "variants": {
+      "S|none": "6fce08e2-5427-4f45-954b-558ce6e2aa87",
+      "S|black": "b5147730-f87d-4723-a009-da9e2116f6ea",
+      "S|white": "b2b0db89-aaa6-46cd-b0fb-0f80c51c2059",
+      "S|oak": "e49a308d-7846-4a51-8b9d-c9043377622f",
+      "M|none": "b39a3e18-5e24-4c59-8562-2305af552f85",
+      "M|black": "1f3e7e0d-e4a4-4e5c-b4a4-74720318b263",
+      "M|white": "bbf42513-7d69-4110-b355-e6039ff82bed",
+      "M|oak": "52bf9150-6361-42c9-8148-a09c58fc5409",
+      "L|none": "fee3b2de-4aa5-495d-ae78-2bcc57653bda",
+      "L|black": "dd1e3107-87ef-4854-8c40-b10a7e22dd43",
+      "L|white": "97944ed5-8387-4d2a-a141-71cec5562d77",
+      "L|oak": "62a85085-3459-41dd-82bc-62723e7e82b6"
+    },
+    "skus": {
+      "S|none": "V-KBKJBC3X",
+      "S|black": "V-V477ABFK",
+      "S|white": "V-TP57NS86",
+      "S|oak": "V-JVEX2ISL",
+      "M|none": "V-TS42LLP7",
+      "M|black": "V-NC7FI2A8",
+      "M|white": "V-PFEBEMP5",
+      "M|oak": "V-Z7XP7WN2",
+      "L|none": "V-6Z429P6Y",
+      "L|black": "V-M6MNZHS1",
+      "L|white": "V-NMZLDR5R",
+      "L|oak": "V-BEDX46PQ"
+    },
+    "cost": {}
+  }
 }

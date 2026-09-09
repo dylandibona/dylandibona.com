@@ -3,5 +3,39 @@
   "where": "Nice, France",
   "orientation": "portrait",
   "published": true,
-  "hero": true
+  "hero": true,
+  "creativehub": {
+    "upload_id": "0171ac49-6489-4d91-8f61-a39f67196c81",
+    "product_id": "52286116-18ee-4135-a6dc-2c634624a5c2",
+    "drop_id": "6f585ef7-33b8-41a4-82a6-c504c0381b07",
+    "variants": {
+      "S|none": "604d53e7-8470-4ca9-a06a-e082796b50b7",
+      "S|black": "7e91baf1-0278-43ac-beea-1bca4db69992",
+      "S|white": "dd52edda-028f-455d-a5b0-9611b1e674fc",
+      "S|oak": "43ff6c1a-1003-445e-b022-5395df60aa90",
+      "M|none": "ae30e749-64e4-4bc5-bd34-0d0bd7be422a",
+      "M|black": "8b24abb8-92a1-4583-a771-75773d38f963",
+      "M|white": "05c33a6f-8117-4316-a477-9207f556f53d",
+      "M|oak": "376e7d07-9da5-498c-8514-8f38ae7cffc7",
+      "L|none": "a921bf20-ff8b-4ace-9787-de7a6680afcb",
+      "L|black": "1cd71937-88d3-440e-b812-6ac7e4c52143",
+      "L|white": "f81a2ae2-444f-464f-83c7-125d5a205f95",
+      "L|oak": "05cef0f2-6ddd-4c17-860d-7cee19099418"
+    },
+    "skus": {
+      "S|none": "V-IY20PF07",
+      "S|black": "V-OJZZXRN2",
+      "S|white": "V-RAP5ASBM",
+      "S|oak": "V-3HJGWFWM",
+      "M|none": "V-FKDLLOHV",
+      "M|black": "V-D6TW4ICB",
+      "M|white": "V-PXP4BQ7Q",
+      "M|oak": "V-24VH7MRP",
+      "L|none": "V-KAP94JQ8",
+      "L|black": "V-0YNHHNJ8",
+      "L|white": "V-F4Z28PF3",
+      "L|oak": "V-DVK5L6OU"
+    },
+    "cost": {}
+  }
 }

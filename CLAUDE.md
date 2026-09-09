@@ -123,7 +123,15 @@ Ferryman has no 400. Body, nav and headings all run at 300; 700 is for emphasis 
 | `/api/spotify` | Recently played, refresh-token flow, cached 60s at the edge |
 | `/api/health` | Liveness check |
 | `/api/checkout` | POST {slug,size,frame} → hosted Checkout Session url. Price recomputed server-side |
-| `/api/stripe/webhook` | checkout.session.completed → fulfil (manual email to Dylan), receipt to buyer, Beehiiv subscribe on consent. Idempotent via `fulfilled_at` on the PaymentIntent |
+| `/api/stripe/webhook` | checkout.session.completed → fulfil, receipt to buyer, Beehiiv subscribe on consent. Idempotent via `fulfilled_at` on the PaymentIntent |
+| `/api/creativehub/webhook` | Accepts and logs order-status events from creativehub (payload shape unknown until one arrives) |
+
+**Fulfilment** (`src/lib/fulfil.ts`): with `CREATIVEHUB_TOKEN` set and a variant id in the
+print's JSON (`creativehub.variants["M|black"]`), it quotes then places the order over the API
+with the Stripe session id as `Idempotency-Key`, stamps the creativehub order id on the
+PaymentIntent, and emails Dylan "placed". Any failure (no token, no variant, bad address,
+quote higher than what the buyer paid, API error) falls through to the manual email with the
+reason. No creativehub sandbox: a test order is a real order, billed to the saved card.
 | `/orders/[session]` | The receipt. Reads the session from Stripe; unpaid or unknown → /prints |
 
 Stripe needs `STRIPE_SECRET_KEY`, `PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`,

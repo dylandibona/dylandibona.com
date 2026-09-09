@@ -26,11 +26,14 @@ for (const l of fs.readFileSync('.env', 'utf8').split('\n')) {
 const TOKEN = process.env.CREATIVEHUB_TOKEN, MASTERS = (process.env.MASTERS_BASE_URL ?? '').replace(/\/$/, '');
 if (!TOKEN) throw new Error('CREATIVEHUB_TOKEN missing');
 const B = 'https://escher-v2.creativehub.io/v1';
-async function ch(p, init = {}) {
-  const r = await fetch(B + p, { ...init, headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json', ...(init.headers ?? {}) } });
-  const t = await r.text();
-  if (!r.ok) throw new Error(`${init.method ?? 'GET'} ${p} → ${r.status}: ${t.slice(0, 300)}`);
-  return t ? JSON.parse(t) : null;
+async function ch(p, init = {}, tries = 4) {
+  for (let i = 1; ; i++) {
+    const r = await fetch(B + p, { ...init, headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json', ...(init.headers ?? {}) } });
+    const t = await r.text();
+    if (r.ok) return t ? JSON.parse(t) : null;
+    if ((r.status >= 500 || r.status === 429) && i < tries) { console.log(`  ${r.status} on ${p}, retry ${i}`); await sleep(4000 * i); continue; }
+    throw new Error(`${init.method ?? 'GET'} ${p} → ${r.status}: ${t.slice(0, 300)}`);
+  }
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -86,21 +89,31 @@ let drop = drops.find((d) => d.title === 'dylandibona.com');
 if (!drop) { drop = await ch('/drops', { method: 'POST', body: JSON.stringify({ title: 'dylandibona.com', create_early_access_page: false }) }); console.log('created drop', drop.id); }
 else console.log('drop', drop.id);
 
+const save = (p, st) => { const j = JSON.parse(fs.readFileSync(p.file, 'utf8')); j.creativehub = st; fs.writeFileSync(p.file, JSON.stringify(j, null, 2) + '\n'); };
 for (const p of prints) {
   const st = p.creativehub ?? {};
   if (!st.upload_id) {
     const u = await ch('/uploads/ref', { method: 'POST', body: JSON.stringify({ url: `${MASTERS}/${p.slug}.jpg`, image_type: 'artwork', name: p.title }) });
-    st.upload_id = u.id; console.log(p.slug, 'upload', u.id);
+    st.upload_id = u.id; console.log(p.slug, 'upload', u.id); save(p, st);
   }
   if (!st.product_id) {
     const pr = await ch(`/drops/${drop.id}/products`, { method: 'POST', body: JSON.stringify({ upload_id: st.upload_id, title: p.title, description: p.where ?? '', is_limited_edition: false, coa_type: 0 }) });
-    st.product_id = pr.id; console.log(p.slug, 'product', pr.id);
+    st.product_id = pr.id; st.drop_id = drop.id; console.log(p.slug, 'product', pr.id); save(p, st);
   }
+  if (args.includes('--no-variants')) continue;
   const res = await ch(`/drops/${drop.id}/products/${st.product_id}/variants`, { method: 'PUT', body: JSON.stringify({ variants: variantsFor(p) }) });
-  // map size_label → variant id, whatever shape comes back
+  // the response does not echo size_label, so key by what it does return:
+  // dimensions + framed + colour → "S", "S framed black", … matching pricing.ts
   const list = res?.variants ?? res?.data ?? (Array.isArray(res) ? res : []);
-  st.variants = {};
-  for (const v of list) st.variants[v.size_label ?? v.label] = v.id;
+  st.variants = {}; st.skus = {}; st.cost = {};
+  for (const v of list) {
+    const long = Math.max(v.print_width_mm, v.print_height_mm), short = Math.min(v.print_width_mm, v.print_height_mm);
+    const size = SIZES.find((s) => Math.max(s.w, s.h) === long && Math.min(s.w, s.h) === short);
+    if (!size) { console.warn('  unmatched variant', v.id, v.print_width_mm, v.print_height_mm); continue; }
+    const key = v.is_framed ? `${size.code}|${v.frame_color}` : `${size.code}|none`;
+    st.variants[key] = v.id; st.skus[key] = v.sku;
+    if (v.production_cost != null) st.cost[key] = v.production_cost;
+  }
   st.drop_id = drop.id;
   console.log(p.slug, 'variants', Object.keys(st.variants).length);
   const json = JSON.parse(fs.readFileSync(p.file, 'utf8')); json.creativehub = st;

@@ -15,6 +15,8 @@ export type Print = {
   published: boolean;
   hero: boolean;
   image: ImageMetadata;
+  /** written by scripts/creativehub-sync.mjs; absent until synced */
+  creativehub?: { upload_id: string; product_id: string; drop_id: string; variants: Record<string, string>; skus?: Record<string, string> };
 };
 
 type Meta = Omit<Print, 'slug' | 'image'>;
