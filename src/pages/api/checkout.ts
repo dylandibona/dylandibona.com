@@ -51,6 +51,9 @@ export const POST: APIRoute = async ({ request }) => {
           },
         },
       }],
+      // Promo codes are a framed-only lever. Unframed sits close enough to cost
+      // that a discount there is not a discount, so the field never appears.
+      allow_promotion_codes: framed,
       metadata: { slug: print.slug, size: size.code, frame: frame.code },
       payment_intent_data: { metadata: { slug: print.slug, size: size.code, frame: frame.code } },
       shipping_address_collection: { allowed_countries: [...SHIP_TO] },

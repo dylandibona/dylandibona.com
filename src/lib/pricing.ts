@@ -33,7 +33,7 @@ export type Size = {
 };
 
 // Priced for how the number reads, not for margin. At this volume the difference
-// between $595 and $760 on a couple of sales a year is not money — but a print
+// between $550 and $760 on a couple of sales a year is not money — but a print
 // under about $50 reads as a poster shop, which is the wrong signal entirely.
 // The framing premium came down most; $280 → $760 on the large was a store markup.
 // PROVISIONAL until theprintspace confirm actual cost per size.
@@ -42,7 +42,7 @@ export const SIZES: Size[] = [
   // in these, so the sheet sizes match exactly; mm in the catalogue sync must agree.
   { code: 'S', cm: '29.7 × 42',  inches: '11.7 × 16.5', mm: [297, 420],   framed: 15000, print:  6500 },
   { code: 'M', cm: '42 × 59.4',  inches: '16.5 × 23.4', mm: [420, 594],   framed: 21500, print: 10500 },
-  { code: 'L', cm: '70 × 100',   inches: '27.6 × 39.4', mm: [700, 1000],  framed: 59500, print: 25000 },
+  { code: 'L', cm: '70 × 100',   inches: '27.6 × 39.4', mm: [700, 1000],  framed: 55000, print: 22500 },
 ];
 export const DEFAULT_SIZE = 1; // the middle one
 

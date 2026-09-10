@@ -65,6 +65,9 @@ shipping a hole.
 Prices live in `SIZES` in `src/lib/prints.ts`, in pence. **They are invented** and
 must be replaced with real CreativeHub cost plus margin before launch.
 
+Promo codes are Stripe-side, framed only (`allow_promotion_codes` is true only when
+`frame != none`).
+
 ---
 
 ## Gotchas that cost real time
@@ -231,7 +234,7 @@ connected store.
 
 ### Before committing to prices
 Quote the large framed to a US address. `pricing.ts` was set for how the numbers read,
-not from cost. The quote says whether $595 covers London to New Orleans on a framed
+not from cost. The quote says whether $550 covers London to New Orleans on a framed
 70×100.
 
 ---

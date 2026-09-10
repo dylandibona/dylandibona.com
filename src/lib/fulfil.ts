@@ -54,6 +54,11 @@ async function viaCreativehub(o: Order): Promise<FulfilResult> {
   if (!o.address.line1 || !o.address.city || !o.address.country) throw new Error('incomplete address');
 
   // Quote first so the cost is on record; a wild number stops the order.
+  // o.amount is the session's amount_total, so a promo-code order is checked
+  // against what was actually paid, not the list price. That is deliberate:
+  // a discount that puts the order underwater should land on the manual email.
+  // Quotes come back in the account currency (USD), not the delivery country's,
+  // so this compares like with like for any destination.
   const q = await quote(variantId, o.address.country);
   if (q.total_incl_vat > o.amount / 100) {
     throw new Error(`quote ${q.currency} ${q.total_incl_vat} exceeds the ${o.amountText} the buyer paid`);
