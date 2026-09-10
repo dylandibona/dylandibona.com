@@ -13,8 +13,8 @@ const NAV = [
 ---
 <div class="home" id="home">
   {/* The name lives top left, in the layout. This is the index, plus contact.
-      On desktop contact pins top right and the index sits bottom left. On a
-      phone both fold into one sheet behind a single mark, bottom left. */}
+      At every width both fold into one sheet behind a single mark, bottom left.
+      The sheet is the nav everywhere. */}
   <div class="masthead" id="masthead">
     <button class="mark" id="mark" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu">
       <span></span><span></span>
@@ -25,7 +25,7 @@ const NAV = [
           {NAV.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
           <li>
             <a href="https://moodboard.dylandibona.com" target="_blank" rel="noopener">
-              Moodboard <span class="ext">↗</span>
+              Moodboard<svg class="ext" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5 7.5 2.5M3.5 2.5h4v4"/></svg>
             </a>
           </li>
         </ol>
@@ -35,6 +35,7 @@ const NAV = [
         <div><a href="tel:+14153412855">+1 415 341 2855</a></div>
         <div><a href="tel:+33749081380">+33 7 49 08 13 80</a></div>
         <div><a href="tel:+447884087851">+44 7884 087851</a></div>
+        <div><a href="https://instagram.com/dylandibona" target="_blank" rel="noopener">@dylandibona</a></div>
       </div>
     </div>
   </div>
@@ -43,8 +44,8 @@ const NAV = [
 </div>
 
 <script>
-  // The mark only exists on a phone. It toggles the sheet; a tap anywhere
-  // else, or Escape, closes it. Sized in CSS, so no JS on desktop at all.
+  // The mark toggles the sheet at every width; a click anywhere else, or
+  // Escape, closes it.
   function wireMark() {
     const mark = document.getElementById('mark');
     const home = document.getElementById('home');

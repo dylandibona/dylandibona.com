@@ -6,11 +6,12 @@ import Site from '../layouts/Site.astro';
 <Site title="Listening — Dylan James DiBona" description="What has been on lately." crumbs={[{ label: "Listening" }]} open>
   {/* Album covers are pictures, so they get the same grid as the prints: a
       contact sheet, not a playlist. The eyebrow is the only heading. */}
-  <div class="eyebrow">Last 10 from Spotify. <a href="https://open.spotify.com/user/dylandibona" target="_blank" rel="noopener">Click to follow ↗</a></div>
+  <div class="eyebrow listen-label">Last 10 from Spotify</div>
   <ul class="covers" id="tracks"></ul>
   <div class="fine" id="note">Loading…</div>
+  <a class="ghost follow" href="https://open.spotify.com/user/dylandibona" target="_blank" rel="noopener">Follow on Spotify →</a>
 
-  <div class="eyebrow" id="plHead" hidden>Playlists</div>
+  <div class="eyebrow listen-label" id="plHead" hidden>Playlists</div>
   <ul class="covers covers-4" id="playlists"></ul>
 </Site>
 
