@@ -29,8 +29,8 @@ export interface Props {
 }
 
 const {
-  title = 'Dylan James DiBona',
-  description = 'Photographs, and prints of them.',
+  title = 'Dylan James DiBona • Creative Director / Co-Conspirator',
+  description = 'A borderless creative director, team leader, collaborator, and all-around hands-on partner who works with brands, agencies, publishers, and inspired individuals to make new things real.',
   open = false,
   crumbs = [],
   image,
@@ -72,6 +72,23 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
   {og && <meta property="og:image:width" content={String(og.attributes.width)} />}
   {og && <meta property="og:image:height" content={String(og.attributes.height)} />}
   <meta name="twitter:card" content={ogUrl ? 'summary_large_image' : 'summary'} />
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Dylan James DiBona',
+    alternateName: 'Dylan DiBona',
+    jobTitle: 'Creative Director',
+    description: 'Creative director, brand leader, co-conspirator.',
+    url: 'https://dylandibona.com',
+    email: 'dylan@dylandibona.com',
+    sameAs: [
+      'https://instagram.com/dylandibona',
+      'https://mondayandpartners.com',
+      'https://natrx.io',
+      'https://missioncycling.org',
+      'https://moodboard.dylandibona.com',
+    ],
+  })} />
   {ogUrl && <meta name="twitter:image" content={ogUrl} />}
   <link rel="icon" href="/favicon.ico" sizes="32x32" />
   <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
