@@ -15,7 +15,7 @@ export async function subscribe(email: string, opts: { source: string; slug?: st
         reactivate_existing: true,
         send_welcome_email: false,
         utm_source: opts.source,
-        custom_fields: opts.slug ? [{ name: 'print_slug', value: opts.slug }] : [],
+        tags: opts.slug ? ['buyer', `print:${opts.slug}`] : [opts.source],
       }),
     });
     if (!r.ok) console.warn('subscribe', r.status, await r.text());
