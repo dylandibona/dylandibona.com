@@ -1,5 +1,6 @@
 ---
 import Site from '../layouts/Site.astro';
+import Ext from '../components/Ext.astro';
 
 /**
  * The business card. One paragraph in Dylan's words, then an index of facts.
@@ -54,11 +55,17 @@ const INDEX: Entry[] = [
       <div class="index-row">
         <dt>{e.term}</dt>
         <dd>
-          {e.facts.map((f) =>
-            f.href
-              ? <a href={f.href} class:list={{ muted: f.muted }}>{f.text}</a>
-              : <span class:list={{ muted: f.muted }}>{f.text}</span>
-          )}
+          {e.facts.map((f) => {
+            if (!f.href) return <span class:list={{ muted: f.muted }}>{f.text}</span>;
+            // anything that leaves the site opens a new window and says so
+            const ext = f.href.startsWith('http');
+            return (
+              <a href={f.href} class:list={{ muted: f.muted }}
+                {...(ext ? { target: '_blank', rel: 'noopener' } : {})}>
+                {f.text}{ext && <Ext />}
+              </a>
+            );
+          })}
         </dd>
       </div>
     ))}

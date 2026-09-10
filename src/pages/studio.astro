@@ -1,12 +1,13 @@
 ---
 import Site from '../layouts/Site.astro';
+import Ext from '../components/Ext.astro';
 ---
 <Site title="Studio — Dylan James DiBona" description="Creative direction, brand and photography." crumbs={[{ label: "Studio" }]} open>
   <div class="eyebrow">Studio</div>
   <h1>The day job</h1>
   <p class="lede">Creative direction, brand, and photography for a small number of clients at a time.</p>
   <ul class="links">
-    <li><a href="https://mondayandpartners.com" target="_blank" rel="noopener">Monday + Partners<em>Creative studio ↗</em></a></li>
-    <li><a href="https://natrx.io" target="_blank" rel="noopener">Natrx<em>Head of Marketing ↗</em></a></li>
+    <li><a href="https://mondayandpartners.com" target="_blank" rel="noopener">Monday + Partners<em>Creative studio<Ext /></em></a></li>
+    <li><a href="https://natrx.io" target="_blank" rel="noopener">Natrx<em>Head of Marketing<Ext /></em></a></li>
   </ul>
 </Site>
