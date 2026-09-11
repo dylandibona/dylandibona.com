@@ -135,11 +135,10 @@ body[data-open="true"] .chrome{opacity:1}
 .close:hover{color:var(--ink);transform:rotate(90deg)}
 
 /* ══ PANEL ═══════════════════════════════════════════════════════════════════ */
-/* no sideways scroll on a phone. vertical overscroll chains to the page so a pull
-   at the top refreshes (iOS/Android); sideways stays contained so a swipe cannot
-   fire the browser's back gesture by accident */
+/* no sideways scroll on a phone. overscroll stays inside the panel; pull to
+   refresh cannot work while the panel is the scroller (Known limitations, CLAUDE.md) */
 .panel{position:fixed;inset:0;z-index:5;overflow-y:auto;overflow-x:hidden;
-  overscroll-behavior-y:auto;overscroll-behavior-x:none;
+  overscroll-behavior:contain;
   padding:calc(var(--gap)*2.8) var(--gap) calc(var(--gap)*2.4);
   /* breadcrumb top + its measured height (--crumbs-h, set in Site.astro; 64px
      covers one line if the script has not run) + the one space token */

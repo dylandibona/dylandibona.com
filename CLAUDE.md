@@ -240,6 +240,21 @@ not from cost. The quote says whether $550 covers London to New Orleans on a fra
 
 ---
 
+## Known limitations
+
+- **Panel pages scroll inside the panel, not the page.** `body` is `overflow:hidden`
+  and every layer is `position:fixed`, so a section's content scrolls in `.panel`'s own
+  scroll box. On phones that means no pull to refresh (iOS Safari only refreshes when
+  the document itself is pulled past its top), the browser toolbar does not shrink on
+  scroll, and tapping the iPhone status bar does not jump to the top.
+  `overscroll-behavior-y:auto` on `.panel` was tried and does nothing; reverted
+  10 Sep 2026. The fix is for panel pages to scroll the document, with the stage, veil
+  and breadcrumb staying fixed behind. Scheduled after launch. It touches the
+  open/close transition and ClientRouter scroll restoration, so test it on a real
+  iPhone and Android.
+
+---
+
 ## Also not built yet
 
 - **The Letter.** Form on /letter posts to `/api/subscribe` → Beehiiv, tagged `letter`. Buyers are added by the Stripe webhook on consent, tagged `buyer` + `print:<slug>`. Without keys, subscribe logs and the form reports failure.
