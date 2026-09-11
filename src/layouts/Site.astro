@@ -436,15 +436,31 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
     // size rows, four frame swatches and a buy button, and a missed click
     // throwing the buyer back to the homepage costs a sale. Close is the ✕,
     // Escape, or the breadcrumb.
-    function wire() {
-      document.querySelector('[data-home-link]')?.addEventListener('click', () => {
-        if (document.body.dataset.open === 'true') navigate('/');
-      });
+    //
+    // Closing steps back when the page behind this one is on the site, so the ✕
+    // and the phone's back arrow agree: /prints → /prints/ferme, ✕ lands on
+    // /prints, and back from there goes home. Astro's router numbers each history
+    // entry from 0 (the page the visitor arrived on), so index > 0 means the entry
+    // behind is ours; a same-site referrer covers a full page load from here.
+    // Landing cold (a search, a link, a QR code on a wall) closes to home, never
+    // back out to another site.
+    function close() {
+      const inSite = (history.state?.index ?? 0) > 0 || document.referrer.startsWith(location.origin + '/');
+      if (history.length > 1 && inSite) history.back();
+      else navigate('/');
     }
-    wire();
-    document.addEventListener('astro:page-load', wire);
+    // One capture listener for the ✕, the name in the breadcrumb and the backdrop,
+    // bound once. It runs before the router's link handler, which skips a click
+    // that is already handled. New-tab and modified clicks are left alone.
+    document.addEventListener('click', (e) => {
+      if (document.body.dataset.open !== 'true') return;
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (!(e.target instanceof Element) || !e.target.closest('.close, .crumbs a[href="/"], [data-home-link]')) return;
+      e.preventDefault();
+      close();
+    }, true);
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && document.body.dataset.open === 'true') navigate('/');
+      if (e.key === 'Escape' && document.body.dataset.open === 'true') close();
     });
   </script>
 </body>
