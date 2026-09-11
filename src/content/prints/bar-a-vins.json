@@ -4,6 +4,7 @@
   "orientation": "portrait",
   "published": true,
   "hero": true,
+  "focal": "50% 40%",
   "caption": "Walking home along Portobello Road at dusk.",
   "creativehub": {
     "upload_id": "4832f944-959f-4885-8ead-1aac525fd13f",

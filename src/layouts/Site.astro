@@ -10,7 +10,7 @@
 import { ClientRouter } from 'astro:transitions';
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
-import { HEROES } from '../lib/prints';
+import { HEROES, focalOf } from '../lib/prints';
 import Loader from '../components/Loader.astro';
 import Masthead from '../components/Masthead.astro';
 import '../styles/site.css';
@@ -43,6 +43,7 @@ const heroes = await Promise.all(
     slug: p.slug,
     title: p.title,
     where: p.where,
+    focal: focalOf(p),
     src: (await getImage({ src: p.image, width: 2400, format: 'webp', quality: 82 })).src,
   }))
 );
@@ -205,6 +206,7 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
           let cv, gl, prog, tex, U = {}, W = 0, H = 0, dpr = 1;
           let img = null, pending = null, phase = 'idle', t0 = 0, from = MAX, to = 1, block = 1, raf = 0;
           let fallback = null;             // 2D context if WebGL is not there
+          let fo = [.5, .5], nextFo = fo;  // focal of the drawn and the waiting photograph
           const T0 = performance.now();
 
           const VS = `attribute vec2 p; varying vec2 v; void main(){ v = p * .5 + .5; gl_Position = vec4(p, 0., 1.); }`;
@@ -217,6 +219,7 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
             uniform float t;       // seconds
             uniform float block;   // px; 1 = sharp
             uniform float flow;    // 0..1, how much water
+            uniform vec2 focal;    // 0..1, the point the crop keeps, as object-position
 
             // simplex-ish value noise, cheap and smooth enough for this
             vec3 mod289(vec3 x){ return x - floor(x * (1. / 289.)) * 289.; }
@@ -255,10 +258,11 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
                 uv = c + (uv - c) * (1. - swell * .035 * flow);
                 uv += bend;
               }
-              // cover-fit the image into the canvas
+              // cover-fit the image into the canvas. the overflow is shared out
+              // by the focal point, which is exactly what object-position does
               float sc = max(res.x / isz.x, res.y / isz.y);
               vec2 fit = isz * sc;                            // drawn size in px
-              vec2 off = (res - fit) * .5;
+              vec2 off = (res - fit) * focal;
               vec2 p = (uv * res - off) / fit;
               p = clamp(p, 0., 1.);
               gl_FragColor = texture2D(img, p);
@@ -283,7 +287,7 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
                 const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc);
                 gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-                for (const n of ['img', 'res', 'isz', 't', 'block', 'flow']) U[n] = gl.getUniformLocation(prog, n);
+                for (const n of ['img', 'res', 'isz', 't', 'block', 'flow', 'focal']) U[n] = gl.getUniformLocation(prog, n);
                 tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -314,6 +318,7 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
             gl.uniform2f(U.isz, img.naturalWidth, img.naturalHeight);
+            gl.uniform2f(U.focal, fo[0], fo[1]);
           }
           function draw(now) {
             if (!img) return;
@@ -327,7 +332,7 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
               const c = fallback;
               c.imageSmoothingEnabled = true;
               const s = Math.max(W / img.naturalWidth, H / img.naturalHeight);
-              c.drawImage(img, (W - img.naturalWidth * s) / 2, (H - img.naturalHeight * s) / 2, img.naturalWidth * s, img.naturalHeight * s);
+              c.drawImage(img, (W - img.naturalWidth * s) * fo[0], (H - img.naturalHeight * s) * fo[1], img.naturalWidth * s, img.naturalHeight * s);
             }
           }
 
@@ -351,14 +356,14 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
           const go = () => { if (!raf) raf = requestAnimationFrame(frame); };
 
           function swap() {
-            img = pending; pending = null;
+            img = pending; pending = null; fo = nextFo;
             upload();
             if (still) { phase = 'idle'; block = 1; draw(performance.now()); return; }
             from = MAX; to = 1; block = MAX; phase = 'in'; t0 = performance.now(); go();
           }
-          function show(next) {
+          function show(next, focal = [.5, .5]) {
             if (!ensure()) return;
-            pending = next;
+            pending = next; nextFo = focal;
             if (img && !still && gl) { from = block; to = MAX; phase = 'out'; t0 = performance.now(); go(); }
             else swap();
           }
@@ -372,7 +377,7 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
           img.onerror = () => { if (++fails < heroes.length) next(); else window.__bootHeroReady?.(); };
           img.onload = () => {
             fails = 0;
-            pix.show(img);
+            pix.show(img, rec.focal);
             current = rec;
             window.__bootHeroReady?.();
             caption();

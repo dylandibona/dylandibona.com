@@ -4,6 +4,7 @@
   "orientation": "portrait",
   "published": true,
   "hero": true,
+  "focal": "50% 60%",
   "caption": "First day exploring Nice. It looked like the place to stop.",
   "creativehub": {
     "upload_id": "0171ac49-6489-4d91-8f61-a39f67196c81",

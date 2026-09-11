@@ -4,6 +4,7 @@
   "orientation": "portrait",
   "published": true,
   "hero": true,
+  "focal": "50% 60%",
   "caption": "A landmark on the climb to La Bérarde. Never once seen it open.",
   "creativehub": {
     "upload_id": "186b6e65-3bba-4999-8972-9babd2caa637",

@@ -4,6 +4,7 @@
   "orientation": "portrait",
   "published": true,
   "hero": true,
+  "focal": "50% 70%",
   "caption": "The Cow, Westbourne Park. Best Guinness in town, arguably.",
   "creativehub": {
     "upload_id": "0f183a27-7186-49cd-97d2-0eb3edf64014",

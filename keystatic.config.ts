@@ -30,6 +30,12 @@ export default config({
           description: 'Landscape only. Portraits crop badly full-bleed.',
           defaultValue: false,
         }),
+        focal: fields.text({
+          label: 'Focal point',
+          description: 'The point the homepage crop keeps on phones, as "X% Y%" (object-position). Pick it with _focal-picker.html in the outer folder.',
+          defaultValue: '50% 50%',
+          validation: { pattern: { regex: /^\d{1,3}(\.\d+)?% \d{1,3}(\.\d+)?%$/, message: 'Use "X% Y%", e.g. "50% 40%".' } },
+        }),
       },
     }),
   },

@@ -72,6 +72,9 @@ shipping a hole.
 - `hero: true` lets a photograph fill the homepage. **Landscape only** — portraits
   crop badly full-bleed.
 - `where: ""` renders nothing. Leave it blank rather than guessing.
+- `focal: "X% Y%"` is the point the background crop keeps on phones, set with
+  `_focal-picker.html` in the outer folder. It means what CSS `object-position` means; the
+  stage shader applies it. Optional, `"50% 50%"` when absent. A malformed value fails the build.
 
 Prices live in `SIZES` in `src/lib/prints.ts`, in pence. **They are invented** and
 must be replaced with real CreativeHub cost plus margin before launch.

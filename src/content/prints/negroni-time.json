@@ -4,6 +4,7 @@
   "orientation": "landscape",
   "published": true,
   "hero": true,
+  "focal": "50% 50%",
   "caption": "My negroni, Keelin’s martini. Hotel Saint Vincent.",
   "creativehub": {
     "upload_id": "06f5a9ad-983c-4cf0-9810-fe3ddd85024f",
