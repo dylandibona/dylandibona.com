@@ -3,12 +3,13 @@ import Site from '../layouts/Site.astro';
 // Copy is Dylan's own. Leave it.
 // No issues exist yet, so there is no archive. When there are some, they get a
 // list under the form; until then the page is the signup and nothing else.
+// The form posts to /api/subscribe, which adds the address to Beehiiv.
 ---
 <Site title="The Letter — Dylan James DiBona" description="Notes sent from my point of view only every so often." crumbs={[{ label: "The Letter" }]} open read>
   <div class="eyebrow">The Letter</div>
   <p class="lede">Notes sent from my point of view only every so often.</p>
 
-  <form class="signup" id="signup">
+  <form class="signup" id="signup" novalidate>
     <label class="sr-only" for="email" style="position:absolute;left:-9999px">Email address</label>
     <input id="email" type="email" name="email" placeholder="Email address" required autocomplete="email" />
     <button type="submit">Subscribe</button>
@@ -21,11 +22,35 @@ import Site from '../layouts/Site.astro';
     const form = document.getElementById('signup') as HTMLFormElement | null;
     const said = document.getElementById('said');
     if (!form || !said) return;
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      // Beehiiv is not connected yet. Say so rather than pretend it worked.
-      said.textContent = 'Not wired up yet — the newsletter opens shortly.';
+      const input = form.querySelector('input[name=email]') as HTMLInputElement;
+      const button = form.querySelector('button') as HTMLButtonElement;
+      said.textContent = ''; said.classList.remove('err');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim())) {
+        said.classList.add('err');
+        said.textContent = 'That doesn\u2019t look like an email address.';
+        input.focus();
+        return;
+      }
+      button.disabled = true;
+      try {
+        const r = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email: input.value }),
+        });
+        const { ok } = await r.json().catch(() => ({ ok: false }));
+        if (ok) { form.classList.add('done'); said.classList.add('done'); said.textContent = 'You\u2019re on the list.'; }
+        else fail();
+      } catch {
+        fail();
+      } finally { button.disabled = false; }
     });
+    function fail() {
+      said.classList.add('err');
+      said.textContent = 'That didn\u2019t take. Try again, or write to dylan@dylandibona.com.';
+    }
   }
   wireSignup();
   document.addEventListener('astro:page-load', wireSignup);

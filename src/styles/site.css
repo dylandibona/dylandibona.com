@@ -375,6 +375,12 @@ p{max-width:54ch;line-height:1.64;color:rgba(242,240,236,.82);font-size:15px;fon
 .signup button:hover{opacity:1}
 .said{font-family:var(--disp);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
   color:var(--faint);min-height:1.4em}
+/* success: the form goes, the sentence takes its place at lede size */
+.signup.done{display:none}
+.said.done{font-family:var(--name);font-size:clamp(34px,5.2vw,72px);font-weight:300;
+  letter-spacing:-.01em;line-height:1;text-transform:none;color:var(--ink);margin:1.2em 0 .6em}
+.panel.read .said.done{text-align:center}
+.said.err{color:#E8A25A;font-size:11px}
 
 /* ══ BIO ════════════════════════════════════════════════════════════════════
    Same spine as the loader: term right-aligned to a centre axis, facts left.

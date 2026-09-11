@@ -126,6 +126,7 @@ Ferryman has no 400. Body, nav and headings all run at 300; 700 is for emphasis 
 | `/api/spotify` | Recently played, refresh-token flow, cached 60s at the edge |
 | `/api/health` | Liveness check |
 | `/api/checkout` | POST {slug,size,frame} → hosted Checkout Session url. Price recomputed server-side |
+| `/api/subscribe` | POST `{email}` from the /letter form → Beehiiv subscription, tag `letter` → `{ok}` |
 | `/api/stripe/webhook` | checkout.session.completed → fulfil, receipt to buyer, Beehiiv subscribe on consent. Idempotent via `fulfilled_at` on the PaymentIntent |
 | `/api/creativehub/webhook` | Accepts and logs order-status events from creativehub (payload shape unknown until one arrives) |
 
@@ -241,5 +242,5 @@ not from cost. The quote says whether $550 covers London to New Orleans on a fra
 
 ## Also not built yet
 
-- **The Letter.** Beehiiv does not exist yet. The form says so rather than pretending.
+- **The Letter.** Form on /letter posts to `/api/subscribe` → Beehiiv, tagged `letter`. Buyers are added by the Stripe webhook on consent, tagged `buyer` + `print:<slug>`. Without keys, subscribe logs and the form reports failure.
   Issue rows link nowhere.

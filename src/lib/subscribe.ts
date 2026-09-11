@@ -2,10 +2,10 @@
  * Add a buyer to The Letter. Beehiiv, when it exists; until then this is a
  * no-op that logs. Never throws: a list failure must not touch an order.
  */
-export async function subscribe(email: string, opts: { source: string; slug?: string }) {
+export async function subscribe(email: string, opts: { source: string; slug?: string }): Promise<boolean> {
   const key = import.meta.env.BEEHIIV_API_KEY, pub = import.meta.env.BEEHIIV_PUBLICATION_ID;
-  if (!email) return;
-  if (!key || !pub) { console.log('subscribe (beehiiv not configured)', email, opts); return; }
+  if (!email) return false;
+  if (!key || !pub) { console.log('subscribe (beehiiv not configured)', email, opts); return false; }
   try {
     const r = await fetch(`https://api.beehiiv.com/v2/publications/${pub}/subscriptions`, {
       method: 'POST',
@@ -18,6 +18,7 @@ export async function subscribe(email: string, opts: { source: string; slug?: st
         tags: opts.slug ? ['buyer', `print:${opts.slug}`] : [opts.source],
       }),
     });
-    if (!r.ok) console.warn('subscribe', r.status, await r.text());
-  } catch (e: any) { console.warn('subscribe', e?.message ?? e); }
+    if (!r.ok) { console.warn('subscribe', r.status, await r.text()); return false; }
+    return true;
+  } catch (e: any) { console.warn('subscribe', e?.message ?? e); return false; }
 }
