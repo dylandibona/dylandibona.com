@@ -15,7 +15,8 @@ export async function subscribe(email: string, opts: { source: string; slug?: st
         reactivate_existing: true,
         send_welcome_email: false,
         utm_source: opts.source,
-        tags: opts.slug ? ['buyer', `print:${opts.slug}`] : [opts.source],
+        utm_medium: opts.slug ? 'buyer' : 'form',
+        utm_campaign: opts.slug ?? 'letter',
       }),
     });
     if (!r.ok) { console.warn('subscribe', r.status, await r.text()); return false; }

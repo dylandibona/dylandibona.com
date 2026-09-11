@@ -180,7 +180,12 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
     // element, so re-running this on every navigation would stack timers.
     if (!window.__hero) {
       window.__hero = (() => {
-        const HOLD = 45000;
+        // The dials, in ms. IN and OUT are the pixelate transitions, arriving and
+        // leaving. SHARP is how long a photograph sits sharp between them. The
+        // rotation is built from all three, so changing IN or OUT never eats into
+        // the sharp hold.
+        const IN = 800, OUT = 800, SHARP = 42250;
+        const HOLD = OUT + IN + SHARP;
         let current = null, timer = null, paused = false, fails = 0;
 
         const stage = () => document.getElementById('stage');
@@ -195,7 +200,7 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
         // next arrives. Same shader, one uniform for block size.
         // Falls back to a plain 2D draw with no flow if WebGL is unavailable.
         const pix = (() => {
-          const MAX = 96, IN = 2200, OUT = 550;
+          const MAX = 96;                  // largest block, px
           const still = matchMedia('(prefers-reduced-motion:reduce)').matches;
           let cv, gl, prog, tex, U = {}, W = 0, H = 0, dpr = 1;
           let img = null, pending = null, phase = 'idle', t0 = 0, from = MAX, to = 1, block = 1, raf = 0;
@@ -300,7 +305,8 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
             const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
             if (w !== W || h !== H) { W = cv.width = w; H = cv.height = h; if (gl) gl.viewport(0, 0, W, H); }
           }
-          const ease = (x) => 1 - Math.pow(1 - x, 3);
+          // cubic ease-in-out, the same curve arriving and leaving
+          const ease = (x) => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 
           function upload() {
             if (!gl || !img) return;
@@ -330,7 +336,7 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
             if (phase === 'in' || phase === 'out') {
               const dur = phase === 'in' ? IN : OUT;
               const tt = Math.min(1, (now - t0) / dur);
-              const e = phase === 'in' ? ease(tt) : tt * tt;
+              const e = ease(tt);
               block = Math.exp(Math.log(from) + (Math.log(to) - Math.log(from)) * e);
               draw(now);
               if (tt < 1) { raf = requestAnimationFrame(frame); return; }

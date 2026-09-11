@@ -37,10 +37,12 @@ The homepage photograph is a WebGL canvas in `.stage`, not an `<img>`. One fragm
 shader does two things. The water: two slow layers of simplex noise bend the texture
 lookup by a few thousandths, and a broader, slower swell magnifies by about a percent as
 it passes, so the print looks like it sits under a still sheet of water. The arrival: a new
-photograph comes in as 96px blocks that shrink to sharp (2.2s, eased, log spaced); the
-current one breaks back into blocks (0.55s) before the next. The water only runs on the
+photograph comes in as 96px blocks that shrink to sharp (0.8s, ease-in-out, log spaced); the
+current one breaks back into blocks (0.8s, ease-in-out) before the next. The water only runs on the
 homepage; behind the veil the frame loop stops. No WebGL → plain 2D draw, no flow.
-Reduced motion → sharp at once, no flow. Dials: `MAX`, `IN`, `OUT` in the `pix` module;
+Reduced motion → sharp at once, no flow. Dials: `IN`, `OUT`, `SHARP` at the top of the hero controller in
+`Site.astro` (the rotation is `OUT + IN + SHARP`, so the transitions never cut into the
+sharp hold), `MAX` in the `pix` module;
 in the shader, `.0035` is bend amplitude, `.012` is swell magnification, the `t *` factors
 are speed.
 
@@ -51,7 +53,16 @@ are speed.
 - `src/assets/prints/<slug>.jpg` — the photograph, 2500px on the long edge, with the
   printed white border baked in (53px). The border is intentional and should show
   inside the frame. Do not crop it, and do not draw a second one in CSS.
-- `src/content/prints/<slug>.json` — title, where, orientation, published, hero
+- `src/content/prints/<slug>.json` — title, where, orientation, published, hero, caption
+  (caption is for the newsletter; not rendered on the site by decision, 11 Sep)
+- `public/masters/jpg/<slug>.jpg` — the print master creativehub fetches at print time.
+  100×70cm at 300dpi = 11811×8268 (or 8268×11811), photo scaled to cover and centre-cropped,
+  250px white border all sides, JPEG q95, 4:4:4, sRGB embedded. `public/prints/<slug>.jpg`
+  is the 1200px copy for email and OG. New photos: TIFF/JPEG into `../_prints/`, same recipe.
+- Colour: the 8 original masters carry theprintspace's Photo Rag *printer* profile (Empty
+  Gesture era), not sRGB; they preview washed out in colour-managed viewers. Whether
+  creativehub honours that tag is unknown until the Fermé test print is seen. Barrel Proof
+  and Autumn Lines are sRGB. See STATUS.md.
 
 `src/lib/prints.ts` joins them with `import.meta.glob` and **throws at build time**
 if a JSON file has no matching image. A missing pair fails the build rather than
@@ -257,5 +268,5 @@ not from cost. The quote says whether $550 covers London to New Orleans on a fra
 
 ## Also not built yet
 
-- **The Letter.** Form on /letter posts to `/api/subscribe` → Beehiiv, tagged `letter`. Buyers are added by the Stripe webhook on consent, tagged `buyer` + `print:<slug>`. Without keys, subscribe logs and the form reports failure.
-  Issue rows link nowhere.
+- **The Letter.** Form on /letter posts to `/api/subscribe` → Beehiiv. Beehiiv's create endpoint has no `tags`; provenance rides in UTM fields instead: source `letter`/`print`, medium `form`/`buyer`, campaign = print slug. Segment on those in Beehiiv. Without keys, subscribe logs and the form reports failure.
+  /letter lists archive issues from the hardcoded `issues` array in `src/pages/letter.astro`; add a new issue to the top of that array when it publishes.

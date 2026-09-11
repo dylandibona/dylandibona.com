@@ -1,9 +1,15 @@
 ---
 import Site from '../layouts/Site.astro';
 // Copy is Dylan's own. Leave it.
-// No issues exist yet, so there is no archive. When there are some, they get a
-// list under the form; until then the page is the signup and nothing else.
+// The archive under the form lists the old issues, newest first. A new issue
+// goes at the top. It stays on screen after a signup; only the form is swapped.
 // The form posts to /api/subscribe, which adds the address to Beehiiv.
+const issues = [
+  { no: 4, title: 'If not now, when?', year: 2020, href: 'https://letter.dylandibona.com/p/if-not-now-when' },
+  { no: 3, title: 'Do you go with Fall or Autumn?', year: 2017, href: 'https://letter.dylandibona.com/p/fall-or-autumn' },
+  { no: 2, title: 'Busy is good, right?', year: 2016, href: 'https://letter.dylandibona.com/p/busy-is-good-right' },
+  { no: 1, title: 'Some quick news', year: 2016, href: 'https://letter.dylandibona.com/p/some-quick-news' },
+];
 ---
 <Site title="The Letter — Dylan James DiBona" description="Notes sent from my point of view only every so often." crumbs={[{ label: "The Letter" }]} open read>
   <div class="eyebrow">The Letter</div>
@@ -15,6 +21,15 @@ import Site from '../layouts/Site.astro';
     <button type="submit">Subscribe</button>
   </form>
   <div class="said" id="said" role="status" aria-live="polite"></div>
+
+  <section class="archive" aria-labelledby="previously">
+    <h2 class="eyebrow" id="previously">Previously</h2>
+    <ol>
+      {issues.map((i) => (
+        <li><a href={i.href}>No. {i.no} · {i.title} · {i.year}</a></li>
+      ))}
+    </ol>
+  </section>
 </Site>
 
 <script>

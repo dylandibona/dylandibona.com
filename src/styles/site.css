@@ -392,6 +392,14 @@ p{max-width:54ch;line-height:1.64;color:rgba(242,240,236,.82);font-size:15px;fon
   letter-spacing:-.01em;line-height:1;text-transform:none;color:var(--ink);margin:1.2em 0 .6em}
 .panel.read .said.done{text-align:center}
 .said.err{color:#E8A25A;font-size:11px}
+/* the archive: one line per issue, the whole line the link. body text colour,
+   and the underline only arrives on hover. not a nav, so the nav rules stay off it */
+.archive{margin-top:3.2em}
+.archive ol{list-style:none;display:flex;flex-direction:column;gap:.2em}
+.archive a{font-size:15px;line-height:1.64;color:rgba(242,240,236,.82);
+  text-decoration:underline 1px transparent;text-underline-offset:.22em;
+  transition:text-decoration-color .25s ease}
+.archive a:hover{text-decoration-color:currentColor}
 
 /* ══ BIO ════════════════════════════════════════════════════════════════════
    Same spine as the loader: term right-aligned to a centre axis, facts left.
