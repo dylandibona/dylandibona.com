@@ -182,14 +182,24 @@ p{max-width:54ch;line-height:1.64;color:rgba(242,240,236,.82);font-size:15px;fon
    fitted to the cell with cq units */
 .tile figure{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
   container-type:size}
-/* the print page's black frame, small. same rail and rim colours as .mount (keep
-   them in step), but no tilt, no rebate shadow and no padding: the white border
-   printed into the image is the mat. a border mitres its corners at 45°, so the
-   top/bottom and side rail tones come out right without drawing four rails */
-.mini-mount{--fw:clamp(4px,.6vw,8px);--rail:#171614;--rail-side:#0F0E0D;--rim:rgba(242,240,236,.16);
+/* the print page's black frame, small. same rail and rim colours and the same
+   rebate shadow as .mount (keep them in step), but no tilt and no padding: the
+   white border printed into the image is the mat. a border mitres its corners at
+   45°, so the top/bottom and side rail tones come out right without drawing four
+   rails */
+.mini-mount{--fw:clamp(8px,1.2vw,16px);--rail:#171614;--rail-side:#0F0E0D;--rim:rgba(242,240,236,.16);
   position:relative;display:block;border:var(--fw) solid;
   border-color:var(--rail) var(--rail-side);
   box-shadow:0 6px 18px rgba(0,0,0,.18);transition:transform 1s var(--ease)}
+/* the rebate, as on .mount::before: the moulding throws a shadow onto the sheet,
+   heaviest under the top rail. over the image only, never the rails. the glass
+   sheen is left out; on the print page it follows the tilt, and there is none here */
+.mini-mount::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.5),
+             inset 0 3px 7px rgba(0,0,0,.22),
+             inset 0 -1px 3px rgba(0,0,0,.14),
+             inset 1px 0 4px rgba(0,0,0,.12),
+             inset -1px 0 4px rgba(0,0,0,.12)}
 /* a black frame on a black page has no edge without a rim */
 .mini-mount::after{content:"";position:absolute;inset:calc(var(--fw) * -1);pointer-events:none;
   box-shadow:inset 0 0 0 1px var(--rim)}
