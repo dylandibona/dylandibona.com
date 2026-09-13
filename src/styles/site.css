@@ -198,7 +198,11 @@ p{max-width:54ch;line-height:1.64;color:rgba(242,240,236,.82);font-size:15px;fon
    white border printed into the image is the mat. a border mitres its corners at
    45°, so the top/bottom and side rail tones come out right without drawing four
    rails */
-.mini-mount{--fw:clamp(8px,1.2vw,16px);--rail:#171614;--rail-side:#0F0E0D;--rim:rgba(242,240,236,.16);
+/* the moulding in proportion to the frame, as on the print page: there 15px of
+   moulding on a 633px portrait frame is 2.4% of its long side (1440x900). a tile's
+   long side is its cell, the figure's width, so 2.4% of 100cqw holds that at every
+   tile size. a px or vw width drifts: 16px on a 266px tile was 6% */
+.mini-mount{--fw:calc(100cqw * .024);--rail:#171614;--rail-side:#0F0E0D;--rim:rgba(242,240,236,.16);
   position:relative;display:block;border:var(--fw) solid;
   border-color:var(--rail) var(--rail-side);
   box-shadow:0 6px 18px rgba(0,0,0,.18);transition:transform 1s var(--ease)}
