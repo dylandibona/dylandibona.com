@@ -142,6 +142,14 @@ new one sends the page view when the router swaps it into the head. Page views a
 referrers only, no custom events. No cookies, so no consent banner is needed. The
 dashboard is in the Vercel project under Analytics.
 
+The tracker does not load from `/_vercel/insights` on the live site. It loads from a
+project-specific path, `/c0ba99a13bdc0070/script.js`, and page views POST to
+`/c0ba99a13bdc0070/view`. The package takes that path from a variable Vercel sets during
+its build (`PUBLIC_VERCEL_OBSERVABILITY_CLIENT_CONFIG`) and only falls back to
+`/_vercel/insights/script.js` without it, as in a local build. The old URL still answers
+but the page never requests it. To check analytics is live, look for
+`script[data-sdkn="@vercel/analytics/astro"]` in the page, not for `_vercel/insights`.
+
 ---
 
 ## API routes
