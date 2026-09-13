@@ -110,7 +110,18 @@ for (const p of prints) {
     st.upload_id = u.id; console.log(p.slug, 'upload', u.id); save(p, st);
   }
   if (!st.product_id) {
-    const pr = await ch(`/drops/${drop.id}/products`, { method: 'POST', body: JSON.stringify({ upload_id: st.upload_id, title: p.title, description: p.where ?? '', is_limited_edition: false, coa_type: 0, ...(insertId ? { print_insert_id: insertId } : {}) }) });
+    // creativehub ingests the referenced file asynchronously; a product built on a fresh
+    // upload 502s ("upstream_data_error") until that finishes, which can take several
+    // minutes for a 30-50MB master. Retry once a minute, up to 15 minutes.
+    const body = JSON.stringify({ upload_id: st.upload_id, title: p.title, description: p.where ?? '', is_limited_edition: false, coa_type: 0, ...(insertId ? { print_insert_id: insertId } : {}) });
+    let pr;
+    for (let i = 1; ; i++) {
+      try { pr = await ch(`/drops/${drop.id}/products`, { method: 'POST', body }, 1); break; }
+      catch (e) {
+        if (!/502/.test(e.message) || i >= 15) throw e;
+        console.log(`  ${p.slug}: upload still processing, waiting (${i}/15)`); await sleep(60000);
+      }
+    }
     st.product_id = pr.id; st.drop_id = drop.id; console.log(p.slug, 'product', pr.id); save(p, st);
   }
   if (insertId && st.insert_id !== insertId) {
