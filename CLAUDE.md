@@ -133,6 +133,17 @@ Ferryman has no 400. Body, nav and headings all run at 300; 700 is for emphasis 
 
 ---
 
+## Analytics
+
+Vercel Web Analytics, added once in `src/layouts/Site.astro` (`<Analytics />` from
+`@vercel/analytics/astro`, in the head), so every page is tracked. ClientRouter
+navigations count too: each page renders its own `<vercel-analytics>` element, and the
+new one sends the page view when the router swaps it into the head. Page views and
+referrers only, no custom events. No cookies, so no consent banner is needed. The
+dashboard is in the Vercel project under Analytics.
+
+---
+
 ## API routes
 
 | Route | What |
