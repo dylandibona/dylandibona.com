@@ -9,8 +9,9 @@
 | Framework | Astro 6.x, Vercel adapter |
 | CMS | Keystatic (`storage: local`, dev only) |
 | UI | React 19 (peer dep for Keystatic only — no React components ship) |
-| Type | Area, from Adobe Fonts kit `yfz0paf` |
+| Type | Ferryman (text) and Gandur New (the name), Adobe Fonts kit `yfz0paf` |
 | Styles | One stylesheet, `src/styles/site.css` |
+| Analytics | Vercel Web Analytics (see Analytics) |
 
 ---
 
@@ -23,6 +24,32 @@ Real URLs throughout, because a print needs an address someone can type off a wa
 
 `body[data-open]` drives every open/closed state in CSS. Home sets `false`, every
 other route sets `true` via the layout's `open` prop. There is no JS toggling classes.
+
+### Navigation (10 Sep 2026)
+On desktop the index stacks in the bottom left and the contact block (email, three phones,
+@dylandibona) pins top right, both always visible. At 720px and below they fold into one
+sheet behind a two-line mark, bottom left; that CSS is the block under `the mark: two short
+lines` in `site.css`. The breadcrumb is a `<nav>` too, so bare `nav a` rules reach it: its
+links take 15px on desktop and 19px on phones from them.
+
+### Closing a panel
+The ✕, the name in the breadcrumb, the backdrop and Escape all call `close()` in
+`Site.astro`, through one capture listener bound once. It steps back with `history.back()`
+when the entry behind is on this site (Astro's router stamps `history.state.index`, 0 on
+the page the visitor arrived on; a same-site referrer also counts) and otherwise navigates
+home. So /prints, then /prints/ferme, then ✕ lands on /prints. The browser's own back
+button is left alone: from a cold deep link it leaves the site, by decision (10 Sep).
+
+### Space below the title
+Panel content starts `--below-title` (1.5rem) under the breadcrumb on every page at every
+width. The breadcrumb wraps on narrow phones and long print titles, so an inline script
+right after it writes its real height to `--crumbs-h` (on load, when fonts finish loading,
+on resize, after each swap) and `.panel` pads by `--gap + --crumbs-h + --below-title`.
+
+### Links that leave the site
+`src/components/Ext.astro` is the new-window mark, drawn as an SVG because iOS renders the
+↗ character as an emoji. On /bio any `http` link opens a new tab and carries the mark;
+`mailto:` and `tel:` links do not.
 
 ### Layout props
 ```astro
@@ -76,11 +103,26 @@ shipping a hole.
   `_focal-picker.html` in the outer folder. It means what CSS `object-position` means; the
   stage shader applies it. Optional, `"50% 50%"` when absent. A malformed value fails the build.
 
-Prices live in `SIZES` in `src/lib/prints.ts`, in pence. **They are invented** and
-must be replaced with real CreativeHub cost plus margin before launch.
+Prices live in `SIZES` in `src/lib/pricing.ts` (re-exported by `prints.ts`), in US cents.
+Unframed / framed: S $65 / $150, M $105 / $215, L $225 / $550 (L lowered 10 Sep). Every price
+on the site renders from there. Real creativehub quotes (9 Sep, `PLAYBOOK.md` Phase 5) show
+every line profitable; the S lines are thin.
 
 Promo codes are Stripe-side, framed only (`allow_promotion_codes` is true only when
-`frame != none`).
+`frame != none`). The creativehub cost guard in `fulfil.ts` compares the quote with the
+session's `amount_total`, which is after any discount, so a discounted order that quotes
+above what was paid falls through to the manual email. Quotes come back in the account
+currency (USD) for every destination.
+
+### The prints index (10 and 13 Sep)
+Each tile is a small copy of the print page's black frame: `.mini-mount`, with the same
+rail and rim colours as `.mount` (keep them in step) and the same inset rebate shadow, drawn
+as a border so the corners mitre. No tilt, no glass sheen, no mat; the white border printed
+into the image is the mat. The moulding is `calc(100cqw * .024)`, 2.4% of the frame's long
+side, which is the print page frame's proportion at 1440x900. Images are sized from the cell
+by `data-orientation`, so a lazy image that has not arrived still gets a full-size frame.
+Four columns, three at 1100px. At 720px and below, one column in source order: landscape
+frames fill the column and portrait frames are 70% of it, centred, the same sheet turned.
 
 ---
 
@@ -182,7 +224,7 @@ rather than an empty list.
 
 ---
 
-## Checkout and fulfilment (not built yet)
+## Checkout and fulfilment (built 8 and 9 Sep)
 
 Decided 8 Sep 2026. Two halves, built so the second can land without touching the first.
 
@@ -198,16 +240,15 @@ Stripe webhook retry can never place two orders.
 - `manual` (ships first): emails Dylan the full order — print, size, frame, address,
   session id — and he places it by hand on creativehub. This is the fallback forever,
   not just the interim: if the API call fails for any reason, fall through to it.
-- `creativehub` (once API access is enabled): quote, then order, per the spec below.
+- `creativehub` (live since 9 Sep): quote, then order, per the spec below.
 
-**Order status page** at a real URL so any email is one link. Reads from wherever
-orders are stored (see below).
+**Order status page** at a real URL, `/orders/[session]`, so any email is one link. It
+reads the session back from Stripe.
 
-**Orders need a table.** Session id, slug, size, frame, address, Stripe amount,
-creativehub order id, creativehub quoted cost, status, timestamps. Free tier only:
-Supabase or Vercel Postgres. Decide at build time.
+**No orders table.** Stripe is the system of record: the Checkout Session and its
+PaymentIntent metadata carry the order and the creativehub order id (`PLAYBOOK.md`).
 
-**Tracking email.** No creativehub webhook exists yet, so a daily Vercel cron polls
+**Tracking email (not built yet).** No creativehub webhook exists yet, so a daily Vercel cron polls
 open orders via `GET /v1/orders/{id}` and emails when an item reaches dispatched.
 
 ---
@@ -267,9 +308,8 @@ connected store.
   `GET /invoices`.
 
 ### Before committing to prices
-Quote the large framed to a US address. `pricing.ts` was set for how the numbers read,
-not from cost. The quote says whether $550 covers London to New Orleans on a framed
-70×100.
+Done 9 Sep: the large framed to a US address quotes $385 delivered against $550. The full
+quote table is in `PLAYBOOK.md` Phase 5.
 
 ---
 
