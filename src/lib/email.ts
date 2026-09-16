@@ -92,7 +92,7 @@ ${o.amountText}
 Shipping to
 ${addressLines(o).join('\n')}
 
-Each print is made when it is ordered, by hand in London on Hahnemühle Photo Rag. Allow up to 10 days depending on your address. You'll get a note when it ships.
+Each print is made when it is ordered, by hand on Hahnemühle Photo Rag. It ships in about a week, and you'll get a note when it does.
 
 Your order: ${o.receiptUrl}
 
@@ -106,12 +106,49 @@ Dylan`;
   ${printBlock(o)}
   <tr><td>${label('Shipping to')}${lines(addressLines(o))}</td></tr>
   <tr><td>
-    ${p('Each print is made when it is ordered, by hand in London on Hahnemühle Photo Rag. Allow up to 10 days depending on your address. You\u2019ll get a note when it ships.')}
+    ${p('Each print is made when it is ordered, by hand on Hahnemühle Photo Rag. It ships in about a week, and you\u2019ll get a note when it does.')}
     ${p(`Your order is at <a href="${o.receiptUrl}" style="color:#F2F0EC;text-decoration:underline;text-decoration-color:rgba(242,240,236,.35)">dylandibona.com/orders/${esc(o.ref)}</a>.`)}
     ${p('If anything about this is wrong, or you just want to say hello, reply to this email. It comes to me.')}
     ${p('Dylan', 'margin-top:1.6em;color:rgba(242,240,236,.6)')}
-  </td></tr>`, `${o.title}, ${o.sizeIn} in, ${frameText(o).toLowerCase()}. Up to 10 days.`);
+  </td></tr>`, `${o.title}, ${o.sizeIn} in, ${frameText(o).toLowerCase()}. Ships in about a week.`);
   await send(o.email, `Your print: ${o.title}`, text, html);
+}
+
+/* ─── To the buyer, once theprintspace dispatch ──────────────────────────────
+   creativehub gives no tracking number over the API, so the email offers one on
+   reply. Sent by /api/cron/shipped. */
+export async function sendShipped(o: Order) {
+  if (!o.email) return;
+  const first = (o.name || '').trim().split(/\s+/)[0];
+  const hello = first ? `${first}, your print is on its way.` : 'Your print is on its way.';
+  const ship = 'It has shipped from theprintspace. Orders to the US arrive in a few days by UPS. Anywhere else, allow one to two weeks.';
+  const ask = 'If you\u2019d like the tracking number, reply to this email and I\u2019ll send it.';
+  const text =
+`${hello}
+
+${o.title}${o.where ? ', ' + o.where : ''}
+${o.sizeCm} cm · ${o.sizeIn} in
+${frameText(o)}
+
+${ship}
+
+${ask.replace(/\u2019/g, "'")}
+
+Your order: ${o.receiptUrl}
+
+Dylan`;
+  const html = shell(`
+  <tr><td style="padding:0 0 22px">
+    <p style="margin:0;font-size:26px;line-height:1.25;color:#F2F0EC">${esc(hello)}</p>
+  </td></tr>
+  ${printBlock(o)}
+  <tr><td>
+    ${p(ship)}
+    ${p(ask)}
+    ${p(`Your order is at <a href="${o.receiptUrl}" style="color:#F2F0EC;text-decoration:underline;text-decoration-color:rgba(242,240,236,.35)">dylandibona.com/orders/${esc(o.ref)}</a>.`)}
+    ${p('Dylan', 'margin-top:1.6em;color:rgba(242,240,236,.6)')}
+  </td></tr>`, `${o.title} has shipped from theprintspace.`);
+  await send(o.email, 'Your print is on its way', text, html);
 }
 
 /* ─── To Dylan ────────────────────────────────────────────────────────────── */

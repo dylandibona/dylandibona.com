@@ -212,6 +212,7 @@ but the page never requests it. To check analytics is live, look for
 | `/api/subscribe` | POST `{email}` from the /letter form → Beehiiv subscription, tag `letter` → `{ok}` |
 | `/api/stripe/webhook` | checkout.session.completed → fulfil, receipt to buyer, Beehiiv subscribe on consent. Idempotent via `fulfilled_at` on the PaymentIntent |
 | `/api/creativehub/webhook` | Accepts and logs order-status events from creativehub (payload shape unknown until one arrives) |
+| `/api/cron/shipped` | Daily cron (`vercel.json`, 15:00 UTC). Emails the buyer once when creativehub marks the order dispatched; stamps `shipped_at` on the PaymentIntent. Needs `Authorization: Bearer $CRON_SECRET` |
 
 **Fulfilment** (`src/lib/fulfil.ts`): with `CREATIVEHUB_TOKEN` set and a variant id in the
 print's JSON (`creativehub.variants["M|black"]`), it quotes then places the order over the API
@@ -223,7 +224,8 @@ reason. No creativehub sandbox: a test order is a real order, billed to the save
 
 Stripe needs `STRIPE_SECRET_KEY`, `PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`,
 `SITE_URL`. Email needs `RESEND_API_KEY` (sending from `orders@send.dylandibona.com`) and
-`ORDER_NOTIFY_EMAIL`. Newsletter needs `BEEHIIV_API_KEY`, `BEEHIIV_PUBLICATION_ID`; absent,
+`ORDER_NOTIFY_EMAIL`. The shipped cron needs `CRON_SECRET` (Vercel sends it as a Bearer token;
+unset, the route answers 401 to everything). Newsletter needs `BEEHIIV_API_KEY`, `BEEHIIV_PUBLICATION_ID`; absent,
 subscribe is a logged no-op. Local webhooks: `stripe listen --forward-to localhost:4321/api/stripe/webhook`.
 
 Spotify needs `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`
@@ -256,8 +258,24 @@ reads the session back from Stripe.
 **No orders table.** Stripe is the system of record: the Checkout Session and its
 PaymentIntent metadata carry the order and the creativehub order id (`PLAYBOOK.md`).
 
-**Tracking email (not built yet).** No creativehub webhook exists yet, so a daily Vercel cron polls
-open orders via `GET /v1/orders/{id}` and emails when an item reaches dispatched.
+**Shipped email (built 16 Sep).** `src/pages/api/cron/shipped.ts`, daily at 15:00 UTC from
+`vercel.json`. It searches PaymentIntents with `fulfilled_via = creativehub`, skips any without a
+`creativehub_order_id` or with `shipped_at`, and calls `GET /v1/orders/{id}`. When the
+order's top-level `status` is `"dispatched"` it stamps `shipped_at` on the PaymentIntent, then
+sends `sendShipped` (subject "Your print is on its way"). Stamp before send: a failed email is
+logged and can be resent by hand, but it never sends twice. One log line per run
+(`cron shipped: N open, N emailed, …`). Manual orders (placed by hand) are not polled.
+Manual run: `curl -H "Authorization: Bearer $CRON_SECRET" https://dylandibona.com/api/cron/shipped`.
+
+What theprintspace support told us, 16 Sep:
+- Routing: US addresses print at their US studio and ship UPS; everything else prints in the UK.
+  C-Type prints are the exception (UK only). Photo Rag is not C-Type, so US orders go US.
+- The API returns no tracking number. The email offers it on reply instead.
+- Webhooks are not delivered yet, even with `webhook_uri` set. The daily poll is the intended
+  pattern. `/api/creativehub/webhook` stays as a logger in case they start.
+
+Site copy says nothing about where prints are made (16 Sep): "Made to order on Hahnemühle
+Photo Rag", "made to order by hand at theprintspace", "Ships in about a week".
 
 ---
 
