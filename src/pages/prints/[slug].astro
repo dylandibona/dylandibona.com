@@ -63,7 +63,7 @@ const opening = priceOf(SIZES[DEFAULT_SIZE], DEFAULT_FRAME);
       </div>
 
       <button class="buy-btn" id="buy" data-slug={print.slug}>Buy — {money(opening)}</button>
-      <div class="fine" id="ship">{FRAMED_NOTE}<br>Dispatched in 2–5 days.</div>
+      <div class="fine" id="ship">{FRAMED_NOTE}<br>Ships in about a week.</div>
       <div class="fine">{PRINT_NOTE}</div>
     </div>
   </div>
@@ -105,7 +105,7 @@ const opening = priceOf(SIZES[DEFAULT_SIZE], DEFAULT_FRAME);
         b.setAttribute('aria-selected', String(b.dataset.frame === frame)));
       mount.dataset.frame = frame;
       buy.textContent = 'Buy — ' + money(priceOf(SIZES[sizeIndex], frame));
-      ship.innerHTML = (frame === 'none' ? PRINT_ONLY_NOTE : FRAMED_NOTE) + '<br>Dispatched in 2–5 days.';
+      ship.innerHTML = (frame === 'none' ? PRINT_ONLY_NOTE : FRAMED_NOTE) + '<br>Ships in about a week.';
     }
 
     sizes.querySelectorAll('li').forEach((li) =>

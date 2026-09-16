@@ -53,7 +53,7 @@ export const money = (cents: number) =>
   '$' + (cents / 100).toLocaleString('en-US', { maximumFractionDigits: 0 });
 
 export const PRINT_NOTE =
-  'Giclée on Hahnemühle Photo Rag, made to order by hand at theprintspace in London. ' +
+  'Giclée on Hahnemühle Photo Rag, made to order by hand at theprintspace. ' +
   'Sizes are the full sheet, printed border included.';
 
 export const FRAMED_NOTE = 'Framed prints ship ready to hang.';

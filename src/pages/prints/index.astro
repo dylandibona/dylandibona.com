@@ -3,9 +3,9 @@ import { Image } from 'astro:assets';
 import Site from '../../layouts/Site.astro';
 import { PRINTS } from '../../lib/prints';
 ---
-<Site title="Prints — Dylan James DiBona" description="Made to order in London on Hahnemühle Photo Rag. Three sizes, choice of frame or none. Shipping is included, anywhere." crumbs={[{ label: "Prints" }]} open>
+<Site title="Prints — Dylan James DiBona" description="Made to order on Hahnemühle Photo Rag. Three sizes, choice of frame or none. Shipping is included, anywhere." crumbs={[{ label: "Prints" }]} open>
   <div class="eyebrow">Prints</div>
-  <p class="lede">Made to order in London on Hahnemühle Photo Rag.<br />Three sizes, choice of frame or none. Shipping is included, anywhere.</p>
+  <p class="lede">Made to order on Hahnemühle Photo Rag.<br />Three sizes, choice of frame or none. Shipping is included, anywhere.</p>
   <div class="grid">
     {PRINTS.map((p) => (
       <a class="tile" href={`/prints/${p.slug}`} data-orientation={p.orientation}>
