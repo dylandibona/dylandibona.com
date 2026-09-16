@@ -70,8 +70,16 @@ homepage; behind the veil the frame loop stops. No WebGL → plain 2D draw, no f
 Reduced motion → sharp at once, no flow. Dials: `IN`, `OUT`, `SHARP` at the top of the hero controller in
 `Site.astro` (the rotation is `OUT + IN + SHARP`, so the transitions never cut into the
 sharp hold), `MAX` in the `pix` module;
-in the shader, `.0035` is bend amplitude, `.012` is swell magnification, the `t *` factors
-are speed.
+in the shader, `.011` is bend amplitude, `.035` is swell magnification, the `t *` factors
+are speed. The water fades to zero over the outer 12% of the canvas (`smoothstep(0., .12, …)`),
+so it never pushes an edge of the photograph out of frame.
+
+**No extra crop (16 Sep).** `.stage` is exactly the visible viewport (`100dvh`, no overscan,
+no breathe scale), and the shader's cover-fit is the only crop: a phone loses what the aspect
+ratio costs and nothing more. The focal point only chooses where that overflow goes; it adds no
+scale. The stage reads `public/bg/<slug>.jpg`, the print master with its 250px border shaved
+off, 2400px long side, q88 (`scripts/make-bg.sh`; rerun after adding or replacing a master),
+and falls back to `public/prints/<slug>.jpg` if one is missing. Every hero needs a master.
 
 ## Prints
 

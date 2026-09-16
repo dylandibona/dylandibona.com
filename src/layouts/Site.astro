@@ -38,16 +38,18 @@ const {
   read = false,
 } = Astro.props;
 
-// Pre-generate the hero variants at build time so the client only ever gets optimised files.
-const heroes = await Promise.all(
-  HEROES.map(async (p) => ({
-    slug: p.slug,
-    title: p.title,
-    where: p.where,
-    focal: focalOf(p),
-    src: (await getImage({ src: p.image, width: 2400, format: 'webp', quality: 82 })).src,
-  }))
-);
+// The stage reads public/bg/<slug>.jpg: the print master with its 250px printed
+// border cropped off, 2400px long side (scripts/make-bg.sh). The assets in
+// src/assets/prints carry the border, so they would need scaling up to hide it.
+// public/prints/<slug>.jpg is the fallback if a bg file is missing.
+const heroes = HEROES.map((p) => ({
+  slug: p.slug,
+  title: p.title,
+  where: p.where,
+  focal: focalOf(p),
+  src: `/bg/${p.slug}.jpg`,
+  fallback: `/prints/${p.slug}.jpg`,
+}));
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://dylandibona.com');
 
 // Share card. Prints pass their own photograph; any other page falls back to the
@@ -249,7 +251,9 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
                 uv = (floor(uv * cells) + .5) / cells;
               }
               // the water: two slow layers of noise bend the lookup slightly,
-              // and a broad, even slower swell magnifies a little as it passes
+              // and a broad, even slower swell magnifies a little as it passes.
+              // it fades to nothing at the canvas edges, so the water never
+              // pushes the top or bottom of the photograph out of frame
               if (flow > 0.) {
                 vec2 q = uv * vec2(res.x / res.y, 1.);
                 float n1 = snoise(q * 1.4 + vec2(t * .035, -t * .025));
@@ -257,8 +261,9 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
                 vec2 bend = vec2(n1, n2) * .011 * flow;
                 float swell = snoise(q * .6 + vec2(t * .015, t * .01));
                 vec2 c = vec2(.5 + swell * .25, .5 - swell * .2);
-                uv = c + (uv - c) * (1. - swell * .035 * flow);
-                uv += bend;
+                vec2 d = (c + (uv - c) * (1. - swell * .035 * flow) + bend) - uv;
+                vec2 e = min(uv, 1. - uv);
+                uv += d * smoothstep(0., .12, min(e.x, e.y));
               }
               // cover-fit the image into the canvas. the overflow is shared out
               // by the focal point, which is exactly what object-position does
@@ -300,6 +305,7 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
                 fallback = cv.getContext('2d', { alpha: false });
               }
               addEventListener('resize', size, { passive: true });
+              visualViewport?.addEventListener('resize', size, { passive: true });
             }
             size();
             return true;
@@ -375,8 +381,12 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
         function paint(rec) {
           const st = stage(); if (!st) return;
           const img = new Image();
-          img.src = rec.src; img.alt = '';
-          img.onerror = () => { if (++fails < heroes.length) next(); else window.__bootHeroReady?.(); };
+          img.alt = '';
+          img.onerror = () => {
+            if (img.src.endsWith(rec.src) && rec.fallback) { img.src = rec.fallback; return; }
+            if (++fails < heroes.length) next(); else window.__bootHeroReady?.();
+          };
+          img.src = rec.src;
           img.onload = () => {
             fails = 0;
             pix.show(img, rec.focal);
