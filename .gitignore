@@ -25,3 +25,7 @@ pnpm-debug.log*
 .vercel
 public/masters/*
 !public/masters/jpg/
+
+# Local only: never commit secrets or source archives
+stripe_backup_code.txt
+*.tar.gz
