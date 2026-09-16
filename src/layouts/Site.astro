@@ -38,17 +38,16 @@ const {
   read = false,
 } = Astro.props;
 
-// The stage reads public/bg/<slug>.jpg: the print master with its 250px printed
+// The stage reads public/bg/<slug>.webp: the print master with its 250px printed
 // border cropped off, 2400px long side (scripts/make-bg.sh). The assets in
 // src/assets/prints carry the border, so they would need scaling up to hide it.
-// public/prints/<slug>.jpg is the fallback if a bg file is missing.
+// If that fails it tries the bg JPEG, then public/prints/<slug>.jpg.
 const heroes = HEROES.map((p) => ({
   slug: p.slug,
   title: p.title,
   where: p.where,
   focal: focalOf(p),
-  src: `/bg/${p.slug}.jpg`,
-  fallback: `/prints/${p.slug}.jpg`,
+  srcs: [`/bg/${p.slug}.webp`, `/bg/${p.slug}.jpg`, `/prints/${p.slug}.jpg`],
 }));
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://dylandibona.com');
 
@@ -381,12 +380,13 @@ const ogUrl = og ? new URL(og.src, canonical).href : null;
         function paint(rec) {
           const st = stage(); if (!st) return;
           const img = new Image();
+          let i = 0;
           img.alt = '';
           img.onerror = () => {
-            if (img.src.endsWith(rec.src) && rec.fallback) { img.src = rec.fallback; return; }
+            if (++i < rec.srcs.length) { img.src = rec.srcs[i]; return; }
             if (++fails < heroes.length) next(); else window.__bootHeroReady?.();
           };
-          img.src = rec.src;
+          img.src = rec.srcs[0];
           img.onload = () => {
             fails = 0;
             pix.show(img, rec.focal);

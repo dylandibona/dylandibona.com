@@ -151,6 +151,21 @@ Dylan`;
   await send(o.email, 'Your print is on its way', text, html);
 }
 
+/* ─── To Dylan, when the shipped cron hits a problem ────────────────────────── */
+export async function sendCronAlert(problems: string[]) {
+  const to = import.meta.env.ORDER_NOTIFY_EMAIL;
+  if (!to) throw new Error('ORDER_NOTIFY_EMAIL is not set');
+  const intro = 'The shipped-email cron hit a problem. Each line says what to do.';
+  const text = `${intro}\n\n${problems.map((x) => '- ' + x).join('\n')}`;
+  const html = shell(`
+  <tr><td style="padding:0 0 22px">
+    ${label('Shipped email')}
+    <p style="margin:0;font-size:26px;line-height:1.25;color:#F2F0EC">${problems.length === 1 ? 'One problem' : `${problems.length} problems`}</p>
+  </td></tr>
+  <tr><td>${p(intro)}${problems.map((x) => p(esc(x), 'color:#E9B44C')).join('')}</td></tr>`, intro);
+  await send(to, `Shipped email: ${problems.length === 1 ? 'one problem' : problems.length + ' problems'}`, text, html);
+}
+
 /* ─── To Dylan ────────────────────────────────────────────────────────────── */
 export async function sendNewOrder(o: Order, note = '') {
   const to = import.meta.env.ORDER_NOTIFY_EMAIL;

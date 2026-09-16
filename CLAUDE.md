@@ -77,9 +77,9 @@ so it never pushes an edge of the photograph out of frame.
 **No extra crop (16 Sep).** `.stage` is exactly the visible viewport (`100dvh`, no overscan,
 no breathe scale), and the shader's cover-fit is the only crop: a phone loses what the aspect
 ratio costs and nothing more. The focal point only chooses where that overflow goes; it adds no
-scale. The stage reads `public/bg/<slug>.jpg`, the print master with its 250px border shaved
-off, 2400px long side, q88 (`scripts/make-bg.sh`; rerun after adding or replacing a master),
-and falls back to `public/prints/<slug>.jpg` if one is missing. Every hero needs a master.
+scale. The stage reads `public/bg/<slug>.webp` (q80), the print master with its 250px border shaved
+off, 2400px long side (`scripts/make-bg.sh`; rerun after adding or replacing a master). If it
+fails it tries `public/bg/<slug>.jpg` (q88), then `public/prints/<slug>.jpg`. Every hero needs a master.
 
 ## Prints
 
@@ -262,8 +262,9 @@ PaymentIntent metadata carry the order and the creativehub order id (`PLAYBOOK.m
 `vercel.json`. It searches PaymentIntents with `fulfilled_via = creativehub`, skips any without a
 `creativehub_order_id` or with `shipped_at`, and calls `GET /v1/orders/{id}`. When the
 order's top-level `status` is `"dispatched"` it stamps `shipped_at` on the PaymentIntent, then
-sends `sendShipped` (subject "Your print is on its way"). Stamp before send: a failed email is
-logged and can be resent by hand, but it never sends twice. One log line per run
+sends `sendShipped` (subject "Your print is on its way"). Stamp before send, so it never sends
+twice. Any failure in a run (an API error, or a stamped order whose email failed) sends one
+alert to `ORDER_NOTIFY_EMAIL` listing what to do by hand. One log line per run
 (`cron shipped: N open, N emailed, …`). Manual orders (placed by hand) are not polled.
 Manual run: `curl -H "Authorization: Bearer $CRON_SECRET" https://dylandibona.com/api/cron/shipped`.
 
