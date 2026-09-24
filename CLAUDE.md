@@ -222,6 +222,20 @@ quote higher than what the buyer paid, API error) falls through to the manual em
 reason. No creativehub sandbox: a test order is a real order, billed to the saved card.
 | `/orders/[session]` | The receipt. Reads the session from Stripe; unpaid or unknown → /prints |
 
+**Old URLs (24 Sep).** `/about` redirects in `astro.config.mjs`. `/work/[...slug]` and
+`/project/[...slug]` are endpoints under `src/pages`, all 302 because the case studies come
+back here later. `/project/*` keeps its slug and query and goes to
+`wordpress-1587554-6225781.cloudwaysapps.com`, the old WordPress on Cloudways (server 1587554,
+app 6225781); bare `/project` goes to its root. Two traps: a config redirect carrying a
+`[...slug]` needs `getStaticPaths` in this build, and a config redirect to another host sends
+301 whatever status is set, with the literal `[...slug]` in the URL. Hence endpoints.
+**That host serves a certificate for dylandibona.com**, left from when the domain pointed there,
+so HTTPS to it fails validation until a cert covering the cloudwaysapps hostname is issued in
+Cloudways.
+
+**404** is `src/pages/404.astro`: the Site layout, read (centred), "Nothing here." in the name
+face, links to / and /prints.
+
 Stripe needs `STRIPE_SECRET_KEY`, `PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`,
 `SITE_URL`. Email needs `RESEND_API_KEY` (sending from `orders@send.dylandibona.com`) and
 `ORDER_NOTIFY_EMAIL`. The shipped cron needs `CRON_SECRET` (Vercel sends it as a Bearer token;

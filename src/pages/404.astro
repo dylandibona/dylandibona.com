@@ -1,0 +1,36 @@
+---
+import Site from '../layouts/Site.astro';
+
+/**
+ * Not found. A read page, so it sits centred over the photograph like the
+ * loader: the name top left as everywhere, the line in the name face, and the
+ * two ways out. Nothing here is Astro's default page.
+ */
+---
+<Site
+  title="Nothing here — Dylan James DiBona"
+  description="That page does not exist."
+  crumbs={[{ label: 'Not found' }]}
+  open
+  read
+>
+  <div class="eyebrow">404</div>
+  <h1 class="gone">Nothing here.</h1>
+  <ul class="ways">
+    <li><a href="/">Home</a></li>
+    <li><a href="/prints">Prints</a></li>
+  </ul>
+</Site>
+
+<style>
+  /* The name face, as on the loader. Everything else is the read page's. */
+  .gone { font-family: var(--name); margin-bottom: 1.6em; }
+  .ways { list-style: none; display: flex; gap: 2.2em; justify-content: center; }
+  .ways a {
+    font-family: var(--disp); font-size: 11px; letter-spacing: .2em;
+    text-transform: uppercase; text-decoration: none; opacity: .7;
+    padding-bottom: .5em; border-bottom: 1px solid rgba(242, 240, 236, .28);
+    transition: opacity .3s ease, border-color .3s ease;
+  }
+  .ways a:hover { opacity: 1; border-bottom-color: var(--ink); }
+</style>
